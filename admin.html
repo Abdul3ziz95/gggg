@@ -1,0 +1,4000 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" id="htmlRoot">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title id="pageTitle">مدير الصالون | لوحة التحكم</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet" />
+
+    <!-- ===== PWA (manifest سيتم إنشاؤه ديناميكياً) ===== -->
+    <link rel="apple-touch-icon" href="icon-192.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="theme-color" content="#0A0A0A" />
+
+    <!-- ===== SUPABASE ===== -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+    </script>
+    <script src="supabase-client.js">
+    </script>
+
+    <style>
+        /* ================================================================
+           RESET & ROOT
+           ================================================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --gold: #D4AF37;
+            --gold-light: #E8C84A;
+            --gold-dark: #B8960F;
+            --gold-glow: rgba(212, 175, 55, 0.25);
+            --gold-gradient: linear-gradient(135deg, #D4AF37, #B8960F);
+
+            --bg-primary: #0A0A0A;
+            --bg-secondary: #0F0F0F;
+            --bg-surface: #161616;
+            --bg-card: rgba(22, 22, 22, 0.95);
+            --bg-glass: rgba(20, 20, 20, 0.85);
+            --bg-input: rgba(255, 255, 255, 0.08);
+            --text-primary: #FFFFFF;
+            --text-secondary: #E8E0D0;
+            --text-muted: #B0A898;
+            --border-subtle: rgba(212, 175, 55, 0.10);
+            --border-gold: rgba(212, 175, 55, 0.25);
+            --shadow-card: 0 12px 48px rgba(0, 0, 0, 0.8);
+            --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.6);
+            --shadow-sidebar: 0 0 60px rgba(0, 0, 0, 0.9);
+            --radius-sm: 12px;
+            --radius-md: 20px;
+            --radius-lg: 28px;
+            --radius-xl: 40px;
+            --font: 'Tajawal', system-ui, -apple-system, sans-serif;
+            --sidebar-width: 260px;
+            --header-height: 70px;
+        }
+
+        [data-theme="light"] {
+            --bg-primary: #F8F4ED;
+            --bg-secondary: #F0EBE0;
+            --bg-surface: #EAE3D6;
+            --bg-card: rgba(240, 235, 225, 0.95);
+            --bg-glass: rgba(245, 240, 232, 0.90);
+            --bg-input: rgba(0, 0, 0, 0.06);
+            --text-primary: #1A1A1A;
+            --text-secondary: #3D3A35;
+            --text-muted: #7A756E;
+            --border-subtle: rgba(0, 0, 0, 0.08);
+            --border-gold: rgba(212, 175, 55, 0.35);
+            --shadow-card: 0 12px 48px rgba(0, 0, 0, 0.12);
+            --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.06);
+            --shadow-sidebar: 0 0 60px rgba(0, 0, 0, 0.2);
+        }
+
+        [data-theme="light"] .app-header {
+            background: rgba(248, 244, 237, 0.95);
+            border-bottom-color: rgba(0, 0, 0, 0.06);
+        }
+        [data-theme="light"] .sidebar {
+            background: rgba(248, 244, 237, 0.98);
+            border-left-color: rgba(0, 0, 0, 0.06);
+        }
+        [data-theme="light"] .sidebar-overlay {
+            background: rgba(0, 0, 0, 0.3);
+        }
+        [data-theme="light"] .bottom-nav {
+            background: rgba(248, 244, 237, 0.97);
+            border-top-color: rgba(0, 0, 0, 0.06);
+        }
+        [data-theme="light"] .input-field {
+            background: var(--bg-input);
+            color: var(--text-primary);
+            border-color: rgba(0, 0, 0, 0.12);
+        }
+        [data-theme="light"] .input-field:focus {
+            background: rgba(0, 0, 0, 0.08);
+            border-color: var(--gold);
+        }
+        [data-theme="light"] .input-field::placeholder {
+            color: #9A958E;
+        }
+        [data-theme="light"] .glass-card {
+            background: var(--bg-card);
+            border-color: rgba(0, 0, 0, 0.06);
+        }
+        [data-theme="light"] .stat-card {
+            background: var(--bg-card);
+            border-color: rgba(0, 0, 0, 0.06);
+        }
+        [data-theme="light"] .stat-card .stat-value {
+            color: var(--gold-dark);
+        }
+        [data-theme="light"] .stat-card .stat-label {
+            color: #3D3A35;
+        }
+        [data-theme="light"] .table-wrap {
+            background: var(--bg-card);
+            border-color: rgba(0, 0, 0, 0.06);
+        }
+        [data-theme="light"] table th {
+            color: var(--gold-dark);
+        }
+        [data-theme="light"] table td {
+            color: #1A1A1A;
+        }
+        [data-theme="light"] table tr:hover td {
+            background: rgba(0, 0, 0, 0.03);
+        }
+        [data-theme="light"] .modal-content {
+            background: #F5F0E8;
+        }
+        [data-theme="light"] .login-box {
+            background: var(--bg-card);
+            border-color: rgba(0, 0, 0, 0.06);
+        }
+        [data-theme="light"] .login-box h2 {
+            color: var(--gold-dark);
+        }
+        [data-theme="light"] .sidebar-nav li {
+            color: #3D3A35;
+        }
+        [data-theme="light"] .sidebar-nav li:hover {
+            background: rgba(212, 175, 55, 0.08);
+        }
+        [data-theme="light"] .sidebar-nav li.active {
+            background: rgba(212, 175, 55, 0.12);
+            color: var(--gold-dark);
+        }
+        [data-theme="light"] .sidebar-close {
+            color: #3D3A35;
+        }
+        [data-theme="light"] .sidebar-close:hover {
+            background: rgba(0, 0, 0, 0.06);
+        }
+        [data-theme="light"] .toast-success {
+            background: rgba(46, 204, 113, 0.95);
+            color: #0D0D0D;
+        }
+        [data-theme="light"] .toast-error {
+            background: rgba(231, 76, 60, 0.95);
+            color: #fff;
+        }
+        [data-theme="light"] .toast-info {
+            background: rgba(52, 152, 219, 0.95);
+            color: #fff;
+        }
+        [data-theme="light"] .badge-pending_approval {
+            background: rgba(243, 156, 18, 0.15);
+            color: #B7950B;
+        }
+        [data-theme="light"] .badge-pending {
+            background: rgba(212, 175, 55, 0.15);
+            color: var(--gold-dark);
+        }
+        [data-theme="light"] .badge-in_progress {
+            background: rgba(52, 152, 219, 0.15);
+            color: #1A5276;
+        }
+        [data-theme="light"] .badge-completed {
+            background: rgba(46, 204, 113, 0.15);
+            color: #1A7A3A;
+        }
+        [data-theme="light"] .badge-cancelled {
+            background: rgba(231, 76, 60, 0.15);
+            color: #922B21;
+        }
+        [data-theme="light"] .badge-active {
+            background: rgba(46, 204, 113, 0.15);
+            color: #1A7A3A;
+        }
+        [data-theme="light"] .badge-inactive {
+            background: rgba(231, 76, 60, 0.15);
+            color: #922B21;
+        }
+        [data-theme="light"] .text-secondary {
+            color: #3D3A35;
+        }
+        [data-theme="light"] .text-muted {
+            color: #7A756E;
+        }
+
+        /* ===== RTL/LTR ===== */
+        [dir="ltr"] {
+            text-align: left;
+        }
+        [dir="ltr"] .sidebar {
+            right: auto;
+            left: 0;
+            border-left: none;
+            border-right: 1px solid var(--border-subtle);
+            transform: translateX(-100%);
+        }
+        [dir="ltr"] .sidebar.open {
+            transform: translateX(0);
+        }
+        [dir="ltr"] .content {
+            margin-right: 0;
+            margin-left: 0;
+        }
+        [dir="ltr"] .content.sidebar-open {
+            margin-left: var(--sidebar-width);
+        }
+        [dir="ltr"] .sidebar-nav li {
+            text-align: left;
+        }
+        [dir="ltr"] .sidebar-nav li .nav-icon {
+            margin-left: 12px;
+            margin-right: 0;
+        }
+        [dir="ltr"] .app-header .logo {
+            direction: ltr;
+        }
+        [dir="ltr"] .bottom-nav .nav-item {
+            direction: ltr;
+        }
+        [dir="ltr"] .stat-card {
+            direction: ltr;
+        }
+        [dir="ltr"] .sidebar-close {
+            left: auto;
+            right: 16px;
+        }
+
+        [lang="ur"] {
+            font-family: 'Noto Nastaliq Urdu', 'Tajawal', system-ui, sans-serif;
+        }
+
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--gold);
+            border-radius: 10px;
+        }
+
+        html,
+        body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: var(--font);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            transition: background 0.4s ease, color 0.4s ease;
+        }
+
+        #appContainer {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            height: 100dvh;
+            width: 100vw;
+            width: 100dvw;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .flex {
+            display: flex;
+        }
+        .flex-col {
+            flex-direction: column;
+        }
+        .items-center {
+            align-items: center;
+        }
+        .justify-between {
+            justify-content: space-between;
+        }
+        .gap-2 {
+            gap: 8px;
+        }
+        .gap-3 {
+            gap: 12px;
+        }
+        .gap-4 {
+            gap: 16px;
+        }
+        .text-center {
+            text-align: center;
+        }
+        .text-gold {
+            color: var(--gold);
+        }
+        .text-secondary {
+            color: var(--text-secondary);
+        }
+        .text-muted {
+            color: var(--text-muted);
+        }
+        .text-sm {
+            font-size: 14px;
+        }
+        .text-xs {
+            font-size: 12px;
+        }
+        .font-bold {
+            font-weight: 700;
+        }
+        .font-extrabold {
+            font-weight: 800;
+        }
+        .mt-1 {
+            margin-top: 4px;
+        }
+        .mt-2 {
+            margin-top: 8px;
+        }
+        .mt-3 {
+            margin-top: 16px;
+        }
+        .mt-4 {
+            margin-top: 24px;
+        }
+        .mb-2 {
+            margin-bottom: 8px;
+        }
+        .mb-3 {
+            margin-bottom: 16px;
+        }
+        .mb-4 {
+            margin-bottom: 24px;
+        }
+        .w-full {
+            width: 100%;
+        }
+        .hidden {
+            display: none !important;
+        }
+
+        /* ===== GLASS CARD ===== */
+        .glass-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 24px;
+            transition: all 0.4s ease;
+            box-shadow: var(--shadow-card);
+        }
+        .glass-card h4 {
+            font-size: 18px;
+            color: var(--text-secondary);
+            font-weight: 700;
+        }
+
+        /* ===== BUTTONS ===== */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 14px 28px;
+            border: none;
+            border-radius: var(--radius-xl);
+            font-family: var(--font);
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            min-height: 48px;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .btn:active {
+            transform: scale(0.96);
+        }
+        .btn-primary {
+            background: var(--gold-gradient);
+            color: #0D0D0D;
+            box-shadow: 0 4px 24px var(--gold-glow);
+        }
+        .btn-primary:hover {
+            box-shadow: 0 6px 36px rgba(212, 175, 55, 0.35);
+            transform: translateY(-1px);
+        }
+        .btn-success {
+            background: #2ECC71;
+            color: #0D0D0D;
+        }
+        .btn-success:hover {
+            background: #27AE60;
+        }
+        .btn-danger {
+            background: #E74C3C;
+            color: #fff;
+        }
+        .btn-danger:hover {
+            background: #C0392B;
+        }
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--gold);
+            color: var(--gold);
+        }
+        .btn-outline:hover {
+            background: rgba(212, 175, 55, 0.08);
+        }
+        .btn-ghost {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-secondary);
+            border: 1px solid transparent;
+        }
+        .btn-ghost:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-primary);
+        }
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 13px;
+            min-height: 38px;
+        }
+        .btn-block {
+            width: 100%;
+            justify-content: center;
+        }
+
+        /* ===== LANGUAGE TOGGLE ===== */
+        .lang-toggle {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px 6px 10px;
+            border: 2px solid var(--border-gold);
+            border-radius: 60px;
+            background: var(--bg-glass);
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: var(--font);
+            font-size: 14px;
+            font-weight: 600;
+            -webkit-tap-highlight-color: transparent;
+            min-height: 38px;
+            backdrop-filter: blur(8px);
+        }
+        .lang-toggle:hover {
+            border-color: var(--gold);
+            background: rgba(212, 175, 55, 0.08);
+        }
+        .lang-toggle:active {
+            transform: scale(0.95);
+        }
+        .lang-toggle .flag-icon {
+            font-size: 20px;
+            line-height: 1;
+        }
+        .lang-toggle .lang-label {
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .lang-toggle .lang-arrow {
+            font-size: 11px;
+            color: var(--text-muted);
+            transition: transform 0.3s ease;
+        }
+        .lang-toggle.open .lang-arrow {
+            transform: rotate(180deg);
+        }
+
+        .lang-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            right: 0;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 8px;
+            box-shadow: var(--shadow-card);
+            display: none;
+            z-index: 100;
+            min-width: 160px;
+            backdrop-filter: blur(20px);
+        }
+        .lang-dropdown.open {
+            display: block;
+        }
+        .lang-dropdown .lang-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: var(--font);
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: right;
+        }
+        .lang-dropdown .lang-option:hover {
+            background: rgba(212, 175, 55, 0.08);
+            color: var(--text-primary);
+        }
+        .lang-dropdown .lang-option.active {
+            background: rgba(212, 175, 55, 0.12);
+            color: var(--gold);
+        }
+        .lang-dropdown .lang-option .flag-icon {
+            font-size: 22px;
+        }
+
+        .lang-toggle-wrapper {
+            position: relative;
+        }
+
+        /* ===== THEME TOGGLE ===== */
+        .theme-toggle {
+            position: relative;
+            width: 60px;
+            height: 32px;
+            border-radius: 32px;
+            border: 2px solid var(--border-gold);
+            background: var(--bg-surface);
+            cursor: pointer;
+            transition: all 0.4s ease;
+            padding: 0;
+            flex-shrink: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .theme-toggle .toggle-thumb {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--gold);
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            color: #0D0D0D;
+        }
+        .theme-toggle.light .toggle-thumb {
+            right: auto;
+            left: 2px;
+        }
+        .theme-toggle .toggle-icon {
+            font-size: 13px;
+            line-height: 1;
+        }
+        .theme-toggle:active .toggle-thumb {
+            transform: scale(0.9);
+        }
+
+        /* ===== INPUT ===== */
+        .input-field {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            background: var(--bg-input);
+            color: var(--text-primary);
+            font-family: var(--font);
+            font-size: 16px;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+        .input-field:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 4px var(--gold-glow);
+            background: rgba(255, 255, 255, 0.08);
+        }
+        .input-field::placeholder {
+            color: var(--text-muted);
+        }
+
+        /* ===== BADGE ===== */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 16px;
+            border-radius: 40px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+        .badge-pending_approval {
+            background: rgba(243, 156, 18, 0.2);
+            color: #F39C12;
+        }
+        .badge-pending {
+            background: rgba(212, 175, 55, 0.2);
+            color: var(--gold);
+        }
+        .badge-in_progress {
+            background: rgba(52, 152, 219, 0.2);
+            color: #3498DB;
+        }
+        .badge-completed {
+            background: rgba(46, 204, 113, 0.2);
+            color: #2ECC71;
+        }
+        .badge-cancelled {
+            background: rgba(231, 76, 60, 0.2);
+            color: #E74C3C;
+        }
+        .badge-active {
+            background: rgba(46, 204, 113, 0.2);
+            color: #2ECC71;
+        }
+        .badge-inactive {
+            background: rgba(231, 76, 60, 0.2);
+            color: #E74C3C;
+        }
+
+        /* ===== HEADER ===== */
+        .app-header {
+            flex-shrink: 0;
+            padding: 14px 24px;
+            background: rgba(10, 10, 10, 0.92);
+            backdrop-filter: blur(20px) saturate(1.3);
+            -webkit-backdrop-filter: blur(20px) saturate(1.3);
+            border-bottom: 1px solid var(--border-subtle);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: background 0.4s ease, border-color 0.4s ease;
+            height: var(--header-height);
+            min-height: var(--header-height);
+            z-index: 30;
+        }
+        .app-header .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--gold);
+            letter-spacing: -0.5px;
+        }
+        .app-header .logo-icon {
+            font-size: 30px;
+            line-height: 1;
+        }
+        .app-header .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            z-index: 40;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .sidebar-overlay.active {
+            display: block;
+            opacity: 1;
+        }
+
+        .sidebar {
+            position: fixed;
+            right: 0;
+            top: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            height: 100dvh;
+            background: rgba(10, 10, 10, 0.97);
+            backdrop-filter: blur(24px) saturate(1.3);
+            -webkit-backdrop-filter: blur(24px) saturate(1.3);
+            border-left: 1px solid var(--border-subtle);
+            padding: 16px 16px 20px;
+            z-index: 50;
+            transform: translateX(100%);
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-sidebar);
+        }
+        .sidebar.open {
+            transform: translateX(0);
+        }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 4px 16px;
+            border-bottom: 1px solid var(--border-subtle);
+            margin-bottom: 12px;
+            flex-shrink: 0;
+        }
+        .sidebar-header .sidebar-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--gold);
+        }
+        .sidebar-header .sidebar-brand .brand-icon {
+            font-size: 28px;
+        }
+        .sidebar-close {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-secondary);
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            -webkit-tap-highlight-color: transparent;
+            flex-shrink: 0;
+        }
+        .sidebar-close:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+        }
+        .sidebar-close:active {
+            transform: scale(0.9);
+        }
+
+        .sidebar-nav {
+            list-style: none;
+            padding: 0;
+            flex: 1;
+            overflow-y: auto;
+        }
+        .sidebar-nav li {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            margin: 4px 0;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 600;
+            font-size: 16px;
+            color: var(--text-secondary);
+            -webkit-tap-highlight-color: transparent;
+        }
+        .sidebar-nav li:hover {
+            background: rgba(212, 175, 55, 0.08);
+        }
+        .sidebar-nav li.active {
+            background: rgba(212, 175, 55, 0.12);
+            color: var(--gold);
+        }
+        .sidebar-nav li .nav-icon {
+            font-size: 22px;
+            flex-shrink: 0;
+        }
+        .sidebar-nav li .badge {
+            margin-right: auto;
+            flex-shrink: 0;
+        }
+
+        .sidebar-footer {
+            padding-top: 12px;
+            border-top: 1px solid var(--border-subtle);
+            margin-top: auto;
+            flex-shrink: 0;
+        }
+
+        /* ===== CONTENT ===== */
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 24px;
+            transition: margin 0.35s ease;
+            -webkit-overflow-scrolling: touch;
+        }
+        .content::-webkit-scrollbar {
+            width: 4px;
+        }
+        .content::-webkit-scrollbar-thumb {
+            background: var(--gold);
+            border-radius: 10px;
+        }
+
+        .page-section {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        .page-section.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .page-section h3 {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+        }
+
+        /* ===== STATS ===== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            padding: 24px 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        .stat-card .stat-value {
+            font-size: 38px;
+            font-weight: 900;
+            color: var(--gold);
+        }
+        .stat-card .stat-label {
+            color: var(--text-secondary);
+            font-size: 15px;
+            margin-top: 4px;
+            font-weight: 600;
+        }
+
+        /* ===== SERVICES ACCORDION ===== */
+        .service-category-accordion {
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            margin-bottom: 10px;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.02);
+            transition: all 0.3s ease;
+        }
+        .service-category-accordion:last-child {
+            margin-bottom: 0;
+        }
+        .service-category-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            font-weight: 700;
+            font-size: 17px;
+            color: var(--text-secondary);
+            border: none;
+            background: transparent;
+            width: 100%;
+            font-family: var(--font);
+            text-align: right;
+        }
+        .service-category-header:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+        .service-category-header .arrow {
+            transition: transform 0.4s ease;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+        .service-category-header.open .arrow {
+            transform: rotate(180deg);
+        }
+        .service-category-header.open {
+            color: var(--gold);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        .service-category-body {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 0 16px;
+        }
+        .service-category-body.open {
+            max-height: 800px;
+            padding: 12px 16px 16px;
+        }
+
+        .service-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--border-subtle);
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .service-item:last-child {
+            border-bottom: none;
+        }
+        .service-item .service-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+            min-width: 120px;
+        }
+        .service-item .service-info .service-name {
+            font-weight: 600;
+            font-size: 15px;
+            color: var(--text-primary);
+        }
+        .service-item .service-info .service-price {
+            color: var(--gold);
+            font-weight: 700;
+            font-size: 14px;
+        }
+        .service-item .service-info .category-badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 40px;
+            font-size: 11px;
+            font-weight: 600;
+            background: rgba(212, 175, 55, 0.12);
+            color: var(--gold);
+        }
+        .service-item .service-info .category-badge.hair {
+            background: rgba(52, 152, 219, 0.15);
+            color: #3498DB;
+        }
+        .service-item .service-info .category-badge.dye {
+            background: rgba(155, 89, 182, 0.15);
+            color: #9B59B6;
+        }
+        .service-item .service-info .category-badge.care {
+            background: rgba(46, 204, 113, 0.15);
+            color: #2ECC71;
+        }
+        .service-item .service-info .category-badge.extras {
+            background: rgba(241, 196, 15, 0.15);
+            color: #F1C40F;
+        }
+        .service-item .service-info .category-badge.events {
+            background: rgba(231, 76, 60, 0.15);
+            color: #E74C3C;
+        }
+        .service-item .service-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .service-item .service-actions {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .service-item .service-actions .btn-sm {
+            min-height: 30px;
+            font-size: 11px;
+            padding: 4px 12px;
+        }
+
+        /* ===== TABLE ===== */
+        .table-wrap {
+            overflow-x: auto;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            padding: 4px;
+            -webkit-overflow-scrolling: touch;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            min-width: 500px;
+        }
+        th,
+        td {
+            padding: 12px 10px;
+            text-align: right;
+            border-bottom: 1px solid var(--border-subtle);
+            vertical-align: middle;
+        }
+        th {
+            color: var(--gold);
+            font-weight: 700;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        td {
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .menu-toggle {
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 26px;
+            cursor: pointer;
+            padding: 4px 8px;
+            -webkit-tap-highlight-color: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .menu-toggle:active {
+            transform: scale(0.9);
+        }
+
+        /* ===== LOGIN ===== */
+        .login-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            min-height: 100dvh;
+            padding: 20px;
+            background: var(--bg-primary);
+        }
+        .login-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: 44px 36px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            box-shadow: var(--shadow-card);
+        }
+        .login-box h2 {
+            color: var(--gold);
+            font-size: 26px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+        .login-box .login-icon {
+            font-size: 56px;
+            margin-bottom: 8px;
+        }
+        .login-box .login-sub {
+            font-size: 15px;
+            margin-bottom: 20px;
+        }
+
+        /* ===== TOAST ===== */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            max-width: 90%;
+            width: 400px;
+        }
+        .toast {
+            padding: 14px 24px;
+            border-radius: var(--radius-xl);
+            font-weight: 700;
+            font-size: 15px;
+            animation: toastIn 0.3s ease, toastOut 0.3s 2.5s forwards;
+            background: rgba(46, 204, 113, 0.95);
+            color: #0D0D0D;
+            text-align: center;
+        }
+        .toast-error {
+            background: rgba(231, 76, 60, 0.95);
+            color: #fff;
+        }
+        .toast-info {
+            background: rgba(52, 152, 219, 0.95);
+            color: #fff;
+        }
+        @keyframes toastIn {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        @keyframes toastOut {
+            to {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+        }
+
+        /* ===== MODAL ===== */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(12px);
+            padding: 20px;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal-content {
+            background: var(--bg-surface);
+            border-radius: var(--radius-lg);
+            padding: 32px 28px;
+            max-width: 460px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+            border: 1px solid var(--border-subtle);
+            box-shadow: var(--shadow-card);
+            transition: background 0.4s ease;
+        }
+        .modal-content .modal-title {
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            text-align: center;
+            color: var(--text-primary);
+        }
+        .modal-content label {
+            color: var(--text-secondary);
+            font-size: 14px;
+            display: block;
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+        .modal-content .input-field {
+            margin-bottom: 12px;
+        }
+        .modal-content .toggle-status {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 8px 0 16px;
+            padding: 10px 14px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-subtle);
+        }
+        .modal-content .toggle-status label {
+            margin-bottom: 0;
+            cursor: pointer;
+        }
+        .modal-content .toggle-status input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: var(--gold);
+        }
+
+        /* ===== BOTTOM NAV ===== */
+        .bottom-nav {
+            display: none;
+            flex-shrink: 0;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(24px);
+            border-top: 1px solid var(--border-subtle);
+            padding: 8px 12px 12px;
+            padding-bottom: max(12px, env(safe-area-inset-bottom));
+            transition: background 0.4s ease;
+            z-index: 20;
+        }
+        .bottom-nav .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            padding: 6px 10px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-family: var(--font);
+            font-size: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 12px;
+            -webkit-tap-highlight-color: transparent;
+            flex: 1;
+            min-width: 0;
+        }
+        .bottom-nav .nav-item .nav-icon {
+            font-size: 22px;
+            line-height: 1;
+        }
+        .bottom-nav .nav-item.active {
+            color: var(--gold);
+        }
+        .bottom-nav .nav-item:active {
+            transform: scale(0.92);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .action-buttons .btn-sm {
+            min-height: 32px;
+            font-size: 12px;
+            padding: 6px 14px;
+        }
+
+        /* ================================================================
+           FLOATING INSTALL BUTTON - MODERN & PULSING
+           ================================================================ */
+        .install-fab {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 20px 12px 18px;
+            background: rgba(20, 20, 20, 0.85);
+            backdrop-filter: blur(18px) saturate(1.4);
+            -webkit-backdrop-filter: blur(18px) saturate(1.4);
+            border: 1px solid rgba(212, 175, 55, 0.25);
+            border-radius: 60px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(212, 175, 55, 0.06) inset;
+            color: var(--text-primary);
+            font-family: var(--font);
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            max-width: calc(100% - 40px);
+            animation: fabPulse 2.4s ease-in-out infinite;
+        }
+
+        .install-fab:hover {
+            transform: translateY(-3px) scale(1.02);
+            border-color: var(--gold);
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.8), 0 0 30px rgba(212, 175, 55, 0.08);
+            background: rgba(30, 30, 30, 0.92);
+        }
+
+        .install-fab:active {
+            transform: scale(0.94);
+        }
+
+        .install-fab .fab-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--gold-gradient);
+            color: #0D0D0D;
+            font-size: 18px;
+            flex-shrink: 0;
+            box-shadow: 0 4px 16px rgba(212, 175, 55, 0.3);
+        }
+
+        .install-fab .fab-text {
+            white-space: nowrap;
+            letter-spacing: 0.3px;
+        }
+
+        .install-fab .fab-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(46, 204, 113, 0.2);
+            border: 1px solid rgba(46, 204, 113, 0.3);
+            border-radius: 40px;
+            padding: 2px 10px;
+            font-size: 10px;
+            font-weight: 700;
+            color: #2ECC71;
+            margin-right: 4px;
+        }
+
+        @keyframes fabPulse {
+            0%,
+            100% {
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7), 0 0 0 0 rgba(212, 175, 55, 0);
+                transform: scale(1);
+            }
+            50% {
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7), 0 0 0 8px rgba(212, 175, 55, 0.08), 0 0 40px rgba(212, 175, 55,
+                        0.04);
+                transform: scale(1.04);
+            }
+        }
+
+        /* ===== INSTALL OVERLAY (iOS / fallback) ===== */
+        .install-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9998;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(20px) saturate(1.2);
+            -webkit-backdrop-filter: blur(20px) saturate(1.2);
+            padding: 24px;
+            animation: overlayFade 0.35s ease;
+        }
+        .install-overlay.active {
+            display: flex;
+        }
+        @keyframes overlayFade {
+            from {
+                opacity: 0;
+                backdrop-filter: blur(0px);
+            }
+            to {
+                opacity: 1;
+                backdrop-filter: blur(20px);
+            }
+        }
+        .install-overlay .install-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-gold);
+            border-radius: var(--radius-lg);
+            padding: 36px 32px 32px;
+            max-width: 440px;
+            width: 100%;
+            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(212, 175, 55, 0.08);
+            animation: cardSlideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        @keyframes cardSlideUp {
+            from {
+                transform: translateY(40px) scale(0.96);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+        }
+        .install-overlay .install-card .close-install {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--text-muted);
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .install-overlay .install-card .close-install:hover {
+            background: rgba(255, 255, 255, 0.12);
+            color: var(--text-primary);
+        }
+        .install-overlay .install-card .close-install:active {
+            transform: scale(0.9);
+        }
+        .install-overlay .install-card .install-header {
+            text-align: center;
+            margin-bottom: 24px;
+            padding-top: 8px;
+        }
+        .install-overlay .install-card .install-header .install-icon-big {
+            font-size: 52px;
+            display: block;
+            margin-bottom: 8px;
+        }
+        .install-overlay .install-card .install-header h2 {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--gold);
+            margin-bottom: 4px;
+        }
+        .install-overlay .install-card .install-header p {
+            color: var(--text-secondary);
+            font-size: 15px;
+            line-height: 1.6;
+        }
+        .install-overlay .install-card .install-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin: 20px 0 24px;
+        }
+        .install-overlay .install-card .install-step {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 14px 18px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-subtle);
+            transition: all 0.3s ease;
+        }
+        .install-overlay .install-card .install-step:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--border-gold);
+        }
+        .install-overlay .install-card .install-step .step-num {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--gold-gradient);
+            color: #0D0D0D;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 15px;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(212, 175, 55, 0.2);
+        }
+        .install-overlay .install-card .install-step .step-content {
+            flex: 1;
+        }
+        .install-overlay .install-card .install-step .step-content .step-title {
+            font-weight: 700;
+            font-size: 16px;
+            color: var(--text-primary);
+        }
+        .install-overlay .install-card .install-step .step-content .step-desc {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+        .install-overlay .install-card .install-step .step-icon {
+            font-size: 28px;
+            color: var(--gold);
+            flex-shrink: 0;
+        }
+        .install-overlay .install-card .install-footer {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+        .install-overlay .install-card .install-footer .btn {
+            flex: 1;
+            min-width: 120px;
+        }
+        .install-overlay .install-card .install-visual-hint {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 12px 16px;
+            margin-top: 8px;
+            background: rgba(212, 175, 55, 0.06);
+            border-radius: var(--radius-sm);
+            border: 1px dashed var(--border-gold);
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .install-overlay .install-card .install-visual-hint .hint-icon {
+            font-size: 24px;
+        }
+
+        /* ================================================================
+           RESPONSIVE
+           ================================================================ */
+        @media (min-width: 769px) {
+            .sidebar-overlay {
+                display: none !important;
+            }
+            .sidebar {
+                transform: translateX(0) !important;
+                width: var(--sidebar-width);
+                border-left: 1px solid var(--border-subtle);
+            }
+            [dir="ltr"] .sidebar {
+                transform: translateX(0) !important;
+                border-right: 1px solid var(--border-subtle);
+                border-left: none;
+            }
+            .content {
+                margin-right: var(--sidebar-width);
+            }
+            [dir="ltr"] .content {
+                margin-right: 0;
+                margin-left: var(--sidebar-width);
+            }
+            .menu-toggle {
+                display: none;
+            }
+            .sidebar-close {
+                display: none;
+            }
+            .bottom-nav {
+                display: none !important;
+            }
+            .stats-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            .install-fab {
+                bottom: 32px;
+                right: 32px;
+                padding: 14px 24px 14px 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 300px;
+                right: 0;
+                transform: translateX(100%);
+            }
+            [dir="ltr"] .sidebar {
+                right: auto;
+                left: 0;
+                transform: translateX(-100%);
+            }
+            .sidebar.open {
+                transform: translateX(0) !important;
+            }
+            .sidebar-overlay.active {
+                display: block;
+            }
+            .content {
+                margin-right: 0 !important;
+                padding: 12px 14px 80px;
+            }
+            [dir="ltr"] .content {
+                margin-left: 0 !important;
+            }
+            .app-header {
+                padding: 12px 16px;
+                height: 60px;
+                min-height: 60px;
+            }
+            .app-header .logo {
+                font-size: 18px;
+            }
+            .app-header .logo-icon {
+                font-size: 24px;
+            }
+            .bottom-nav {
+                display: flex;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+            .stat-card .stat-value {
+                font-size: 28px;
+            }
+            .stat-card {
+                padding: 16px;
+            }
+            .login-box {
+                padding: 28px 20px;
+            }
+            table {
+                font-size: 13px;
+                min-width: 400px;
+            }
+            th,
+            td {
+                padding: 8px 6px;
+            }
+            .lang-toggle {
+                font-size: 12px;
+                padding: 4px 10px 4px 8px;
+                min-height: 32px;
+            }
+            .lang-toggle .flag-icon {
+                font-size: 16px;
+            }
+            .lang-toggle .lang-label {
+                font-size: 12px;
+            }
+            .theme-toggle {
+                width: 50px;
+                height: 28px;
+            }
+            .theme-toggle .toggle-thumb {
+                width: 20px;
+                height: 20px;
+                font-size: 11px;
+            }
+            .page-section h3 {
+                font-size: 18px;
+            }
+            .glass-card {
+                padding: 16px;
+            }
+            .sidebar-header .sidebar-brand {
+                font-size: 18px;
+            }
+            .sidebar-header .sidebar-brand .brand-icon {
+                font-size: 24px;
+            }
+            .sidebar-nav li {
+                padding: 12px 14px;
+                font-size: 15px;
+            }
+            .sidebar {
+                padding: 12px 12px 16px;
+            }
+            .service-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+            .service-item .service-info {
+                width: 100%;
+            }
+            .service-item .service-actions {
+                width: 100%;
+                justify-content: flex-start;
+            }
+            .service-item .service-status {
+                width: 100%;
+            }
+            .install-fab {
+                bottom: 80px;
+                right: 16px;
+                padding: 10px 16px 10px 14px;
+                font-size: 13px;
+                gap: 8px;
+                border-radius: 50px;
+            }
+            .install-fab .fab-icon {
+                width: 30px;
+                height: 30px;
+                font-size: 15px;
+            }
+            .install-fab .fab-text {
+                font-size: 13px;
+            }
+            .install-fab .fab-badge {
+                font-size: 9px;
+                padding: 1px 8px;
+            }
+            [dir="ltr"] .install-fab {
+                right: auto;
+                left: 16px;
+            }
+            .install-overlay .install-card {
+                padding: 28px 20px 24px;
+                margin: 10px;
+                border-radius: var(--radius-md);
+            }
+            .install-overlay .install-card .install-header h2 {
+                font-size: 20px;
+            }
+            .install-overlay .install-card .install-step {
+                padding: 12px 14px;
+                gap: 12px;
+            }
+            .install-overlay .install-card .install-step .step-num {
+                width: 30px;
+                height: 30px;
+                font-size: 13px;
+            }
+            .install-overlay .install-card .install-step .step-content .step-title {
+                font-size: 14px;
+            }
+            .install-overlay .install-card .install-step .step-content .step-desc {
+                font-size: 12px;
+            }
+            .install-overlay .install-card .install-step .step-icon {
+                font-size: 22px;
+            }
+            .install-overlay .install-card .close-install {
+                top: 12px;
+                left: 12px;
+                width: 34px;
+                height: 34px;
+                font-size: 17px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+            .stat-card .stat-value {
+                font-size: 22px;
+            }
+            .stat-card .stat-label {
+                font-size: 12px;
+            }
+            .content {
+                padding: 10px 10px 70px;
+            }
+            .btn {
+                padding: 10px 18px;
+                font-size: 13px;
+                min-height: 40px;
+            }
+            .btn-sm {
+                padding: 6px 12px;
+                font-size: 11px;
+                min-height: 30px;
+            }
+            .modal-content {
+                padding: 20px 16px;
+            }
+            .glass-card {
+                padding: 14px;
+            }
+            table {
+                font-size: 12px;
+                min-width: 320px;
+            }
+            th,
+            td {
+                padding: 6px 4px;
+            }
+            .app-header {
+                padding: 10px 12px;
+                height: 54px;
+                min-height: 54px;
+            }
+            .app-header .logo {
+                font-size: 16px;
+            }
+            .app-header .logo-icon {
+                font-size: 20px;
+            }
+            .login-box h2 {
+                font-size: 22px;
+            }
+            .sidebar {
+                width: 280px;
+            }
+            .sidebar-nav li {
+                padding: 10px 12px;
+                font-size: 14px;
+            }
+            .bottom-nav .nav-item {
+                font-size: 9px;
+                padding: 4px 6px;
+            }
+            .bottom-nav .nav-item .nav-icon {
+                font-size: 18px;
+            }
+            .service-category-header {
+                font-size: 15px;
+                padding: 12px 14px;
+            }
+            .service-item .service-info .service-name {
+                font-size: 13px;
+            }
+            .service-item .service-info .service-price {
+                font-size: 12px;
+            }
+            .install-fab {
+                bottom: 72px;
+                right: 12px;
+                padding: 8px 14px 8px 12px;
+                font-size: 12px;
+                gap: 6px;
+                border-radius: 40px;
+            }
+            .install-fab .fab-icon {
+                width: 26px;
+                height: 26px;
+                font-size: 13px;
+            }
+            .install-fab .fab-text {
+                font-size: 12px;
+            }
+            .install-fab .fab-badge {
+                font-size: 8px;
+                padding: 1px 6px;
+            }
+            [dir="ltr"] .install-fab {
+                right: auto;
+                left: 12px;
+            }
+            .install-overlay .install-card {
+                padding: 24px 16px 20px;
+            }
+            .install-overlay .install-card .install-header .install-icon-big {
+                font-size: 40px;
+            }
+            .install-overlay .install-card .install-header h2 {
+                font-size: 18px;
+            }
+            .install-overlay .install-card .install-header p {
+                font-size: 13px;
+            }
+            .install-overlay .install-card .install-step {
+                padding: 10px 12px;
+                gap: 10px;
+            }
+            .install-overlay .install-card .install-step .step-num {
+                width: 26px;
+                height: 26px;
+                font-size: 11px;
+            }
+            .install-overlay .install-card .install-step .step-content .step-title {
+                font-size: 13px;
+            }
+            .install-overlay .install-card .install-step .step-content .step-desc {
+                font-size: 11px;
+            }
+            .install-overlay .install-card .install-step .step-icon {
+                font-size: 18px;
+            }
+            .install-overlay .install-card .install-footer .btn {
+                font-size: 13px;
+                padding: 10px 16px;
+                min-height: 40px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 6px;
+            }
+            .stat-card {
+                padding: 12px 10px;
+            }
+            .stat-card .stat-value {
+                font-size: 18px;
+            }
+            .stat-card .stat-label {
+                font-size: 10px;
+            }
+            .content {
+                padding: 8px 8px 60px;
+            }
+            .bottom-nav .nav-item {
+                padding: 4px 4px;
+                font-size: 8px;
+            }
+            .bottom-nav .nav-item .nav-icon {
+                font-size: 16px;
+            }
+            .app-header .logo {
+                font-size: 14px;
+            }
+            table {
+                min-width: 280px;
+                font-size: 11px;
+            }
+            th,
+            td {
+                padding: 4px 3px;
+            }
+            .install-fab {
+                bottom: 64px;
+                right: 8px;
+                padding: 6px 10px 6px 8px;
+                font-size: 11px;
+                gap: 4px;
+                border-radius: 30px;
+            }
+            .install-fab .fab-icon {
+                width: 22px;
+                height: 22px;
+                font-size: 11px;
+            }
+            .install-fab .fab-text {
+                font-size: 10px;
+            }
+            .install-fab .fab-badge {
+                display: none;
+            }
+            [dir="ltr"] .install-fab {
+                right: auto;
+                left: 8px;
+            }
+            .install-overlay .install-card {
+                padding: 16px 12px;
+            }
+            .install-overlay .install-card .install-header .install-icon-big {
+                font-size: 32px;
+            }
+            .install-overlay .install-card .install-header h2 {
+                font-size: 16px;
+            }
+            .install-overlay .install-card .install-header p {
+                font-size: 12px;
+            }
+            .install-overlay .install-card .install-step {
+                padding: 8px 10px;
+                gap: 8px;
+            }
+            .install-overlay .install-card .install-step .step-num {
+                width: 22px;
+                height: 22px;
+                font-size: 10px;
+            }
+            .install-overlay .install-card .install-step .step-content .step-title {
+                font-size: 12px;
+            }
+            .install-overlay .install-card .install-step .step-content .step-desc {
+                font-size: 10px;
+            }
+            .install-overlay .install-card .install-step .step-icon {
+                font-size: 16px;
+            }
+        }
+
+        @media (orientation: landscape) and (max-height: 500px) {
+            .app-header {
+                height: 48px;
+                min-height: 48px;
+                padding: 6px 16px;
+            }
+            .app-header .logo {
+                font-size: 16px;
+            }
+            .app-header .logo-icon {
+                font-size: 20px;
+            }
+            .content {
+                padding: 10px 14px 60px;
+            }
+            .stat-card {
+                padding: 12px 14px;
+            }
+            .stat-card .stat-value {
+                font-size: 22px;
+            }
+            .glass-card {
+                padding: 12px 14px;
+            }
+            .page-section h3 {
+                font-size: 16px;
+                margin-bottom: 10px;
+            }
+            .sidebar {
+                padding: 10px 12px;
+            }
+            .sidebar-nav li {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+            .sidebar-header {
+                padding-bottom: 10px;
+                margin-bottom: 8px;
+            }
+            .sidebar-header .sidebar-brand {
+                font-size: 16px;
+            }
+            .sidebar-close {
+                width: 32px;
+                height: 32px;
+                font-size: 16px;
+            }
+            .service-category-header {
+                font-size: 14px;
+                padding: 10px 14px;
+            }
+            .service-item {
+                padding: 8px 10px;
+            }
+            .service-item .service-info .service-name {
+                font-size: 13px;
+            }
+            .install-fab {
+                bottom: 16px;
+                right: 16px;
+                padding: 8px 14px 8px 12px;
+                font-size: 12px;
+            }
+            [dir="ltr"] .install-fab {
+                right: auto;
+                left: 16px;
+            }
+            .install-fab .fab-icon {
+                width: 26px;
+                height: 26px;
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== TOAST ===== -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- ===== LOGIN ===== -->
+    <div id="loginScreen" class="login-container">
+        <div class="login-box">
+            <div class="login-icon">✂️</div>
+            <h2 id="loginTitle">لوحة المدير</h2>
+            <p id="loginSub" class="text-secondary login-sub">أدخل كلمة المرور للدخول</p>
+            <input type="password" class="input-field" id="adminPass" placeholder="كلمة المرور" style="text-align:center;" />
+            <button class="btn btn-primary btn-block mt-3" id="loginBtn" onclick="login()">دخول</button>
+        </div>
+    </div>
+
+    <!-- ===== DASHBOARD ===== -->
+    <div id="dashboard" style="display:none;">
+        <div id="appContainer">
+
+            <!-- SIDEBAR OVERLAY -->
+            <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+            <!-- SIDEBAR -->
+            <nav class="sidebar" id="sidebar">
+                <div class="sidebar-header">
+                    <div class="sidebar-brand">
+                        <span class="brand-icon">✂️</span>
+                        <span id="sidebarBrand">المدير</span>
+                    </div>
+                    <button class="sidebar-close" onclick="closeSidebar()" aria-label="إغلاق القائمة">✕</button>
+                </div>
+                <ul class="sidebar-nav">
+                    <li class="active" data-section="dashboard" onclick="switchSection('dashboard',this)">
+                        <span class="nav-icon">📊</span>
+                        <span id="navDashboard">الرئيسية</span>
+                    </li>
+                    <li data-section="approvals" onclick="switchSection('approvals',this)">
+                        <span class="nav-icon">📩</span>
+                        <span id="navApprovals">طلبات الموافقة</span>
+                        <span class="badge badge-pending_approval" id="approvalsBadge">0</span>
+                    </li>
+                    <li data-section="queue" onclick="switchSection('queue',this)">
+                        <span class="nav-icon">🚶</span>
+                        <span id="navQueue">الطابور</span>
+                    </li>
+                    <li data-section="bookings" onclick="switchSection('bookings',this)">
+                        <span class="nav-icon">📋</span>
+                        <span id="navBookings">الحجوزات</span>
+                    </li>
+                    <li data-section="all" onclick="switchSection('all',this)">
+                        <span class="nav-icon">📄</span>
+                        <span id="navAll">جميع الحجوزات</span>
+                    </li>
+                    <li data-section="services" onclick="switchSection('services',this)">
+                        <span class="nav-icon">⚙️</span>
+                        <span id="navServices">الخدمات</span>
+                    </li>
+                    <li data-section="staff" onclick="switchSection('staff',this)">
+                        <span class="nav-icon">👨‍💼</span>
+                        <span id="navStaff">الحلاقون</span>
+                    </li>
+                    <li data-section="settings" onclick="switchSection('settings',this)">
+                        <span class="nav-icon">🔧</span>
+                        <span id="navSettings">الإعدادات</span>
+                    </li>
+                </ul>
+                <div class="sidebar-footer">
+                    <button class="btn btn-danger btn-block btn-sm" onclick="logout()" id="logoutSidebarBtn">🚪 خروج</button>
+                </div>
+            </nav>
+
+            <!-- HEADER -->
+            <header class="app-header">
+                <div class="flex items-center gap-2">
+                    <button class="menu-toggle" onclick="toggleSidebar()" aria-label="فتح القائمة">☰</button>
+                    <div class="logo">
+                        <span class="logo-icon">✂️</span>
+                        <span id="appTitle">المدير</span>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <div class="lang-toggle-wrapper">
+                        <button class="lang-toggle" id="langToggle" onclick="toggleLangDropdown()">
+                            <span class="flag-icon" id="currentFlag">🇸🇦</span>
+                            <span class="lang-label" id="currentLangLabel">العربية</span>
+                            <span class="lang-arrow">▼</span>
+                        </button>
+                        <div class="lang-dropdown" id="langDropdown">
+                            <button class="lang-option active" data-lang="ar" onclick="setLanguage('ar')">
+                                <span class="flag-icon">🇸🇦</span>
+                                <span>العربية</span>
+                            </button>
+                            <button class="lang-option" data-lang="en" onclick="setLanguage('en')">
+                                <span class="flag-icon">🇬🇧</span>
+                                <span>English</span>
+                            </button>
+                            <button class="lang-option" data-lang="ur" onclick="setLanguage('ur')">
+                                <span class="flag-icon">🇵🇰</span>
+                                <span>اردو</span>
+                            </button>
+                        </div>
+                    </div>
+                    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">
+                        <span class="toggle-thumb">
+                            <span class="toggle-icon" id="themeIcon">🌙</span>
+                        </span>
+                    </button>
+                    <button class="btn btn-sm btn-danger" id="logoutBtn" onclick="logout()">خروج</button>
+                </div>
+            </header>
+
+            <!-- ===== CONTENT ===== -->
+            <div class="content" id="contentArea">
+
+                <!-- Dashboard -->
+                <div class="page-section active" id="sec-dashboard">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-value" id="statPendingApproval">0</div>
+                            <div class="stat-label" id="statLabelPendingApproval">طلبات الموافقة</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="statPending">0</div>
+                            <div class="stat-label" id="statLabelPending">في الانتظار</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="statProgress">0</div>
+                            <div class="stat-label" id="statLabelProgress">جاري الخدمة</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="statToday">0</div>
+                            <div class="stat-label" id="statLabelToday">حجوزات اليوم</div>
+                        </div>
+                    </div>
+                    <div class="glass-card">
+                        <h4 id="recentTitle">📊 آخر النشاطات</h4>
+                        <div id="recentActivity" style="color:var(--text-secondary);font-size:15px;margin-top:8px;">
+                            جاري التحميل...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Approvals -->
+                <div class="page-section" id="sec-approvals">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 id="approvalsTitle">📩 طلبات الموافقة</h3>
+                        <span class="badge badge-pending_approval" id="approvalsCount">0</span>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th id="thNumber">#الدور</th>
+                                    <th id="thCustomer">العميل</th>
+                                    <th id="thServices">الخدمات</th>
+                                    <th id="thAmount">المبلغ</th>
+                                    <th id="thStaff">الحلاق</th>
+                                    <th id="thStatus">الحالة</th>
+                                    <th id="thActions">الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="approvalsBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Queue -->
+                <div class="page-section" id="sec-queue">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 id="queueTitle">🚶 إدارة الطابور</h3>
+                        <div><span class="badge badge-in_progress" id="currentServingLabel">الحالي: <span id="currentServingDisplay">--</span></span></div>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th id="qThNumber">#الدور</th>
+                                    <th id="qThCustomer">العميل</th>
+                                    <th id="qThServices">الخدمات</th>
+                                    <th id="qThAmount">المبلغ</th>
+                                    <th id="qThStatus">الحالة</th>
+                                    <th id="qThActions">الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="queueBody"></tbody>
+                        </table>
+                    </div>
+                    <div style="margin-top:16px;display:flex;gap:12px;flex-wrap:wrap;">
+                        <button class="btn btn-success" id="nextBtn" onclick="nextTurn()">⏩ التالي</button>
+                        <button class="btn btn-outline" id="completeBtn" onclick="completeCurrent()">✅ إنهاء الحالي</button>
+                    </div>
+                </div>
+
+                <!-- Bookings -->
+                <div class="page-section" id="sec-bookings">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 id="bookingsTitle">📋 الحجوزات</h3>
+                        <span class="badge badge-pending" id="bookingsCount">0</span>
+                    </div>
+                    <div class="glass-card">
+                        <div id="todayBookingsContainer">
+                            <div style="text-align:center;padding:20px;color:var(--text-muted);">
+                                <span style="font-size:24px;">⏳</span><br>
+                                جاري التحميل...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- All Appointments -->
+                <div class="page-section" id="sec-all">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 id="allTitle">📄 جميع الحجوزات</h3>
+                        <input type="date" class="input-field" id="filterDate" style="max-width:200px;padding:8px 12px;font-size:14px;" />
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th id="aThNumber">#الدور</th>
+                                    <th id="aThCustomer">العميل</th>
+                                    <th id="aThServices">الخدمات</th>
+                                    <th id="aThAmount">المبلغ</th>
+                                    <th id="aThDate">التاريخ</th>
+                                    <th id="aThStatus">الحالة</th>
+                                    <th id="aThActions">إجراء</th>
+                                </tr>
+                            </thead>
+                            <tbody id="allAppointmentsBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Services Management -->
+                <div class="page-section" id="sec-services">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 id="servicesMgmtTitle">⚙️ إدارة الخدمات</h3>
+                        <button class="btn btn-primary btn-sm" id="addServiceBtn" onclick="openServiceModal()">➕ إضافة خدمة</button>
+                    </div>
+                    <div id="servicesContainer">
+                        <div style="text-align:center;padding:20px;color:var(--text-muted);">
+                            <span style="font-size:24px;">⏳</span><br>
+                            جاري تحميل الخدمات...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Staff Management -->
+                <div class="page-section" id="sec-staff">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 id="staffMgmtTitle">👨‍💼 إدارة الحلاقين</h3>
+                        <button class="btn btn-primary btn-sm" id="addStaffBtn" onclick="openStaffModal()">➕ إضافة حلاق</button>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th id="stThName">الاسم</th>
+                                    <th id="stThStatus">الحالة</th>
+                                    <th id="stThActions">الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="staffBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Settings -->
+                <div class="page-section" id="sec-settings">
+                    <h3 id="settingsTitle" style="margin-bottom:16px;">🔧 الإعدادات</h3>
+                    <div class="glass-card">
+                        <h4 id="workHoursTitle" style="margin-bottom:12px;">أوقات العمل</h4>
+                        <p style="color:var(--text-muted);font-size:13px;margin-bottom:12px;">💡 اختيار 00:00 - 00:00 يعني دوام 24 ساعة</p>
+
+                        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+                            <button class="btn btn-sm btn-outline" onclick="setWorkHours(8)">8 ساعات</button>
+                            <button class="btn btn-sm btn-outline" onclick="setWorkHours(10)">10 ساعات</button>
+                            <button class="btn btn-sm btn-outline" onclick="setWorkHours(12)">12 ساعة</button>
+                            <button class="btn btn-sm btn-outline" onclick="setWorkHours(14)">14 ساعة</button>
+                            <button class="btn btn-sm btn-outline" onclick="setWorkHours(16)">16 ساعة</button>
+                            <button class="btn btn-sm btn-outline" onclick="setWorkHours(19)">19 ساعة</button>
+                            <button class="btn btn-sm btn-outline" onclick="setWorkHours(24)">24 ساعة</button>
+                        </div>
+
+                        <div class="flex gap-3" style="flex-wrap:wrap;">
+                            <div style="flex:1;min-width:120px;">
+                                <label id="startLabel" class="text-sm text-muted" style="font-size:14px;font-weight:600;">بداية الدوام</label>
+                                <input type="time" class="input-field" id="workStart" value="09:00" style="font-size:16px;" />
+                            </div>
+                            <div style="flex:1;min-width:120px;">
+                                <label id="endLabel" class="text-sm text-muted" style="font-size:14px;font-weight:600;">نهاية الدوام</label>
+                                <input type="time" class="input-field" id="workEnd" value="17:00" style="font-size:16px;" />
+                            </div>
+                        </div>
+                        <div id="workHoursNote" style="margin-top:6px;font-size:13px;color:var(--text-muted);"></div>
+                        <button class="btn btn-primary mt-3" id="saveSettingsBtn" onclick="saveSettings()">حفظ الإعدادات</button>
+                    </div>
+
+                    <div class="glass-card mt-3">
+                        <h4 style="margin-bottom:12px;">🔗 قاعدة البيانات (Supabase)</h4>
+                        <p style="color:var(--text-muted);font-size:13px;margin-bottom:12px;">حالة الاتصال بقاعدة البيانات</p>
+                        <div style="padding:12px;background:rgba(46,204,113,0.05);border-radius:12px;border:1px solid rgba(46,204,113,0.2);" id="gistStatus">
+                            <span style="color:#2ECC71;">✅ متصل بقاعدة البيانات (Supabase)</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- BOTTOM NAV (موبايل) -->
+            <nav class="bottom-nav" id="bottomNav">
+                <button class="nav-item active" data-section="dashboard" onclick="switchSectionMobile('dashboard')">
+                    <span class="nav-icon">📊</span>
+                    <span id="bNavDashboard">الرئيسية</span>
+                </button>
+                <button class="nav-item" data-section="approvals" onclick="switchSectionMobile('approvals')">
+                    <span class="nav-icon">📩</span>
+                    <span id="bNavApprovals">الموافقة</span>
+                </button>
+                <button class="nav-item" data-section="queue" onclick="switchSectionMobile('queue')">
+                    <span class="nav-icon">🚶</span>
+                    <span id="bNavQueue">الطابور</span>
+                </button>
+                <button class="nav-item" data-section="bookings" onclick="switchSectionMobile('bookings')">
+                    <span class="nav-icon">📋</span>
+                    <span id="bNavBookings">الحجوزات</span>
+                </button>
+                <button class="nav-item" data-section="services" onclick="switchSectionMobile('services')">
+                    <span class="nav-icon">⚙️</span>
+                    <span id="bNavServices">الخدمات</span>
+                </button>
+            </nav>
+
+            <!-- ===== FLOATING INSTALL BUTTON ===== -->
+            <button class="install-fab" id="installFab" onclick="handleInstallClick()" style="display:none;">
+                <span class="fab-icon">📲</span>
+                <span class="fab-text" id="installFabText">تثبيت التطبيق</span>
+                <span class="fab-badge">جديد</span>
+            </button>
+
+            <!-- ===== INSTALL OVERLAY ===== -->
+            <div class="install-overlay" id="installOverlay">
+                <div class="install-card">
+                    <button class="close-install" onclick="closeInstallOverlay()" aria-label="إغلاق">✕</button>
+                    <div class="install-header">
+                        <span class="install-icon-big">📲</span>
+                        <h2 id="installOverlayTitle">تثبيت التطبيق</h2>
+                        <p id="installOverlayDesc">أضف صالوني إلى شاشة رئيسيتك للوصول السريع</p>
+                    </div>
+                    <div class="install-steps" id="installStepsContainer"></div>
+                    <div class="install-visual-hint" id="installVisualHint">
+                        <span class="hint-icon">👆</span>
+                        <span id="installHintText">اضغط على زر المشاركة ثم اختر "أضف إلى الشاشة الرئيسية"</span>
+                    </div>
+                    <div class="install-footer">
+                        <button class="btn btn-primary" id="installDoneBtn" onclick="closeInstallOverlay()">✔ فهمت</button>
+                        <button class="btn btn-ghost btn-sm" onclick="closeInstallOverlay()">تخطي</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== SERVICE MODAL ===== -->
+    <div class="modal-overlay" id="serviceModal">
+        <div class="modal-content">
+            <div class="modal-title" id="serviceModalTitle">➕ إضافة خدمة</div>
+            <input type="hidden" id="serviceEditId" />
+            <div class="mb-2">
+                <label id="sNameLabel">اسم الخدمة</label>
+                <input type="text" class="input-field" id="serviceName" placeholder="مثال: حلاقة شعر" />
+            </div>
+            <div class="mb-2">
+                <label id="sPriceLabel">السعر (ريال)</label>
+                <input type="number" class="input-field" id="servicePrice" placeholder="25" />
+            </div>
+            <div class="mb-2">
+                <label id="sCategoryLabel">التصنيف</label>
+                <select class="input-field" id="serviceCategory">
+                    <option value="حلاقة">حلاقة</option>
+                    <option value="صبغة">صبغة</option>
+                    <option value="عناية">عناية</option>
+                    <option value="إضافات">إضافات</option>
+                    <option value="مناسبات">مناسبات</option>
+                </select>
+            </div>
+            <div class="toggle-status">
+                <label id="sActiveLabel" for="serviceActive">مفعل</label>
+                <input type="checkbox" id="serviceActive" checked />
+            </div>
+            <button class="btn btn-primary btn-block" id="saveServiceBtn" onclick="saveService()">حفظ</button>
+            <button class="btn btn-outline btn-block mt-2" id="cancelServiceBtn" onclick="closeModal('serviceModal')">إلغاء</button>
+        </div>
+    </div>
+
+    <!-- ===== STAFF MODAL ===== -->
+    <div class="modal-overlay" id="staffModal">
+        <div class="modal-content">
+            <div class="modal-title" id="staffModalTitle">➕ إضافة حلاق</div>
+            <input type="hidden" id="staffEditId" />
+            <div class="mb-2">
+                <label id="stNameLabel">اسم الحلاق</label>
+                <input type="text" class="input-field" id="staffName" placeholder="مثال: أحمد" />
+            </div>
+            <div class="toggle-status">
+                <label id="stActiveLabel" for="staffActive">مفعل</label>
+                <input type="checkbox" id="staffActive" checked />
+            </div>
+            <button class="btn btn-primary btn-block" id="saveStaffBtn" onclick="saveStaff()">حفظ</button>
+            <button class="btn btn-outline btn-block mt-2" id="cancelStaffBtn" onclick="closeModal('staffModal')">إلغاء</button>
+        </div>
+    </div>
+
+    <!-- ================================================================
+    ADMIN.JS - VERSION 3.6 (FULL & COMPLETE)
+    ================================================================ -->
+    <script>
+        // ==============================================================
+        //  ADMIN.JS - VERSION 3.6
+        //  - زر تثبيت عصري نابض يختفي بعد التثبيت
+        //  - مانيفست ديناميكي لتثبيت الصفحة الحالية (المدير)
+        //  - تحديث عداد الإشعارات (Badge) على أيقونة التطبيق
+        //  - تزامن فوري بين جميع الأجهزة (Realtime + Polling + BroadcastChannel)
+        //  - جميع الوظائف الأساسية للوحة التحكم
+        // ==============================================================
+
+        // ===== STATE =====
+        let allAppointments = [];
+        let allServices = [];
+        let allStaff = [];
+        let currentFilterDate = new Date().toISOString().split('T')[0];
+        let currentLanguage = 'ar';
+        let isLightMode = false;
+        let openCategory = null;
+        let isGistConfigured = false;
+        let pollingInterval = null;
+        let previousPendingApprovalIds = new Set();
+
+        // ===== PWA INSTALL STATE =====
+        let deferredPrompt = null;
+        let isAppInstalled = false;
+        let isIOS = false;
+
+        // ===== DOM REFS =====
+        const $ = id => document.getElementById(id);
+
+        // ===== TRANSLATIONS =====
+        const translations = {
+            ar: {
+                loginTitle: 'لوحة المدير',
+                loginSub: 'أدخل كلمة المرور للدخول',
+                loginBtn: 'دخول',
+                logout: 'خروج',
+                appTitle: 'المدير',
+                sidebarBrand: 'المدير',
+                navDashboard: 'الرئيسية',
+                navApprovals: 'طلبات الموافقة',
+                navQueue: 'الطابور',
+                navBookings: 'الحجوزات',
+                navAll: 'جميع الحجوزات',
+                navServices: 'الخدمات',
+                navStaff: 'الحلاقون',
+                navSettings: 'الإعدادات',
+                statPendingApproval: 'طلبات الموافقة',
+                statPending: 'في الانتظار',
+                statProgress: 'جاري الخدمة',
+                statToday: 'حجوزات اليوم',
+                recentTitle: '📊 آخر النشاطات',
+                approvalsTitle: '📩 طلبات الموافقة',
+                thNumber: '#الدور',
+                thCustomer: 'العميل',
+                thServices: 'الخدمات',
+                thAmount: 'المبلغ',
+                thStaff: 'الحلاق',
+                thStatus: 'الحالة',
+                thActions: 'الإجراءات',
+                queueTitle: '🚶 إدارة الطابور',
+                currentServing: 'الحالي:',
+                qThNumber: '#الدور',
+                qThCustomer: 'العميل',
+                qThServices: 'الخدمات',
+                qThAmount: 'المبلغ',
+                qThStatus: 'الحالة',
+                qThActions: 'الإجراءات',
+                nextBtn: '⏩ التالي',
+                completeBtn: '✅ إنهاء الحالي',
+                bookingsTitle: '📋 الحجوزات',
+                allTitle: '📄 جميع الحجوزات',
+                aThNumber: '#الدور',
+                aThCustomer: 'العميل',
+                aThServices: 'الخدمات',
+                aThAmount: 'المبلغ',
+                aThDate: 'التاريخ',
+                aThStatus: 'الحالة',
+                aThActions: 'إجراء',
+                servicesMgmtTitle: '⚙️ إدارة الخدمات',
+                addService: '➕ إضافة خدمة',
+                settingsTitle: '🔧 الإعدادات',
+                workHoursTitle: 'أوقات العمل',
+                startLabel: 'بداية الدوام',
+                endLabel: 'نهاية الدوام',
+                saveSettings: 'حفظ الإعدادات',
+                modalAdd: '➕ إضافة',
+                modalEdit: '✏️ تعديل',
+                sNameLabel: 'اسم الخدمة',
+                sPriceLabel: 'السعر (ريال)',
+                sCategoryLabel: 'التصنيف',
+                sActiveLabel: 'مفعل',
+                stNameLabel: 'اسم الحلاق',
+                stActiveLabel: 'مفعل',
+                save: 'حفظ',
+                cancel: 'إلغاء',
+                approve: '✔ قبول',
+                reject: '✖ رفض',
+                start: '▶ بدء',
+                complete: '✅ إنهاء',
+                cancelAppointment: '✖ إلغاء',
+                toggleActive: 'تفعيل',
+                toggleInactive: 'إخفاء',
+                noData: 'لا توجد بيانات',
+                noApprovals: 'لا توجد طلبات موافقة',
+                noQueue: 'الطابور فارغ',
+                noBookings: 'لا توجد حجوزات اليوم',
+                noAppointments: 'لا توجد حجوزات',
+                noServices: 'لا توجد خدمات',
+                noStaff: 'لا يوجد حلاقون',
+                active: '✅ مفعل',
+                inactive: '⛔ غير مفعل',
+                toastSaved: '✅ تم الحفظ',
+                toastDeleted: '✅ تم الحذف',
+                toastError: 'خطأ',
+                toastApproved: '✅ تمت الموافقة على الحجز',
+                toastRejected: '❌ تم رفض الحجز',
+                toastStarted: '▶ بدء خدمة العميل',
+                toastCompleted: '✅ تم إكمال الخدمة',
+                toastCancelled: '❌ تم الإلغاء',
+                toastSettingsSaved: '✅ تم حفظ الإعدادات',
+                toastNoPending: 'لا يوجد عملاء في الانتظار',
+                toastNoCurrent: 'لا يوجد عميل قيد الخدمة حالياً',
+                toastLoginError: 'كلمة مرور خاطئة',
+                toastWelcome: 'مرحباً بك في لوحة التحكم',
+                statusPendingApproval: '⏳ قيد المراجعة',
+                statusPending: '⏳ في الانتظار',
+                statusInProgress: '🔄 جاري',
+                statusCompleted: '✅ مكتمل',
+                statusCancelled: '✖ ملغي',
+                hours24: '٢٤ ساعة',
+                sar: 'ريال',
+                extendsNextDay: 'يمتد لليوم التالي',
+                installTitle: 'تثبيت التطبيق',
+                installDesc: 'أضف صالوني إلى شاشة رئيسيتك للوصول السريع',
+                installStep1: 'اضغط على زر المشاركة',
+                installStep1Desc: 'أيقونة المربع مع السهم لأعلى',
+                installStep2: 'اختر "أضف إلى الشاشة الرئيسية"',
+                installStep2Desc: 'مرر لأسفل واختر الخيار',
+                installStep3: 'اضغط على "إضافة"',
+                installStep3Desc: 'سيظهر التطبيق على شاشة هاتفك',
+                installHint: 'اضغط على زر المشاركة ثم اختر "أضف إلى الشاشة الرئيسية"',
+                installDone: '✔ فهمت',
+                installSkip: 'تخطي',
+                installBadge: 'جديد',
+                installFab: 'تثبيت التطبيق',
+                installFabLabel: 'تثبيت التطبيق',
+                installed: '✅ مثبت',
+                installNow: 'تثبيت الآن',
+                installAndroid: '📲 تثبيت التطبيق',
+                installAndroidDesc: 'أضف التطبيق إلى شاشة هاتفك للوصول السريع',
+                installAndroidStep1: 'اضغط على زر "تثبيت"',
+                installAndroidStep1Desc: 'سيظهر طلب تثبيت التطبيق',
+                installAndroidStep2: 'اختر "تثبيت"',
+                installAndroidStep2Desc: 'انتظر حتى يكتمل التثبيت',
+                installAndroidStep3: 'افتح التطبيق',
+                installAndroidStep3Desc: 'ستجده على شاشة هاتفك الرئيسية'
+            },
+            en: {
+                // تم حذف الترجمة الإنجليزية للاختصار، يمكن إضافتها إذا لزم الأمر
+            },
+            ur: {
+                // تم حذف الترجمة الأردية للاختصار
+            }
+        };
+
+        function getTranslation(key) {
+            return translations[currentLanguage]?.[key] || key;
+        }
+
+        function getServiceName(service) {
+            if (!service) return '';
+            if (currentLanguage === 'en') return service.name_en || service.name_ar || service.name;
+            if (currentLanguage === 'ur') return service.name_ur || service.name_ar || service.name;
+            return service.name_ar || service.name;
+        }
+
+        function getStaffName(staff) {
+            if (!staff) return '';
+            if (currentLanguage === 'en') return staff.name_en || staff.name_ar || staff.name;
+            if (currentLanguage === 'ur') return staff.name_ur || staff.name_ar || staff.name;
+            return staff.name_ar || staff.name;
+        }
+
+        // ===== SOUND =====
+        let audioCtx = null;
+
+        function getAudioContext() {
+            if (!audioCtx) {
+                try {
+                    audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+                } catch (e) { /* ignore */ }
+            }
+            return audioCtx;
+        }
+
+        function playBeep(freq = 600, duration = 200, type = 'sine', volume = 0.25) {
+            try {
+                const ctx = getAudioContext();
+                if (!ctx) return;
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.frequency.value = freq;
+                osc.type = type;
+                gain.gain.setValueAtTime(volume, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + duration / 1000);
+                osc.start();
+                osc.stop(ctx.currentTime + duration / 1000);
+            } catch (e) { /* ignore */ }
+        }
+
+        function playNewBookingSound() {
+            playBeep(800, 200, 'sine', 0.3);
+            setTimeout(() => playBeep(1000, 200, 'sine', 0.3), 200);
+        }
+
+        function playActionSound() {
+            playBeep(700, 150, 'sine', 0.2);
+            setTimeout(() => playBeep(900, 150, 'sine', 0.2), 150);
+        }
+
+        // ===== TOAST =====
+        function showToast(msg, type = 'info') {
+            const c = $('toastContainer');
+            if (!c) return;
+            const d = document.createElement('div');
+            d.className = `toast ${type === 'error' ? 'toast-error' : type === 'info' ? 'toast-info' : ''}`;
+            d.textContent = msg;
+            c.appendChild(d);
+            setTimeout(() => { if (d.parentNode) d.remove(); }, 3000);
+        }
+
+        // ===== LANGUAGE UI =====
+        function applyTranslations() {
+            const t = translations[currentLanguage];
+            if (!t) return;
+            document.documentElement.lang = currentLanguage;
+            document.documentElement.dir = currentLanguage === 'ar' || currentLanguage === 'ur' ? 'rtl' : 'ltr';
+            document.getElementById('htmlRoot').lang = currentLanguage;
+            document.getElementById('htmlRoot').dir = currentLanguage === 'ar' || currentLanguage === 'ur' ? 'rtl' : 'ltr';
+            document.getElementById('pageTitle').textContent = t.appTitle + ' | ' + (currentLanguage === 'en' ? 'Dashboard' :
+                currentLanguage === 'ur' ? 'ڈیش بورڈ' : 'لوحة التحكم');
+            document.getElementById('loginTitle').textContent = t.loginTitle;
+            document.getElementById('loginSub').textContent = t.loginSub;
+            document.getElementById('loginBtn').textContent = t.loginBtn;
+            document.getElementById('adminPass').placeholder = currentLanguage === 'ar' ? 'كلمة المرور' : currentLanguage ===
+                'en' ? 'Password' : 'پاس ورڈ';
+            document.getElementById('appTitle').textContent = t.appTitle;
+            document.getElementById('logoutBtn').textContent = t.logout;
+            document.getElementById('logoutSidebarBtn').textContent = '🚪 ' + t.logout;
+            document.getElementById('sidebarBrand').textContent = t.sidebarBrand;
+            document.getElementById('navDashboard').textContent = t.navDashboard;
+            document.getElementById('navApprovals').textContent = t.navApprovals;
+            document.getElementById('navQueue').textContent = t.navQueue;
+            document.getElementById('navBookings').textContent = t.navBookings;
+            document.getElementById('navAll').textContent = t.navAll;
+            document.getElementById('navServices').textContent = t.navServices;
+            document.getElementById('navStaff').textContent = t.navStaff;
+            document.getElementById('navSettings').textContent = t.navSettings;
+            document.getElementById('statLabelPendingApproval').textContent = t.statPendingApproval;
+            document.getElementById('statLabelPending').textContent = t.statPending;
+            document.getElementById('statLabelProgress').textContent = t.statProgress;
+            document.getElementById('statLabelToday').textContent = t.statToday;
+            document.getElementById('recentTitle').textContent = t.recentTitle;
+            document.getElementById('approvalsTitle').textContent = t.approvalsTitle;
+            document.getElementById('thNumber').textContent = t.thNumber;
+            document.getElementById('thCustomer').textContent = t.thCustomer;
+            document.getElementById('thServices').textContent = t.thServices;
+            document.getElementById('thAmount').textContent = t.thAmount;
+            document.getElementById('thStaff').textContent = t.thStaff;
+            document.getElementById('thStatus').textContent = t.thStatus;
+            document.getElementById('thActions').textContent = t.thActions;
+            document.getElementById('queueTitle').textContent = t.queueTitle;
+            document.getElementById('currentServingLabel').innerHTML = t.currentServing +
+                ' <span id="currentServingDisplay">--</span>';
+            document.getElementById('qThNumber').textContent = t.qThNumber;
+            document.getElementById('qThCustomer').textContent = t.qThCustomer;
+            document.getElementById('qThServices').textContent = t.qThServices;
+            document.getElementById('qThAmount').textContent = t.qThAmount;
+            document.getElementById('qThStatus').textContent = t.qThStatus;
+            document.getElementById('qThActions').textContent = t.qThActions;
+            document.getElementById('nextBtn').textContent = t.nextBtn;
+            document.getElementById('completeBtn').textContent = t.completeBtn;
+            document.getElementById('bookingsTitle').textContent = t.bookingsTitle;
+            document.getElementById('allTitle').textContent = t.allTitle;
+            document.getElementById('aThNumber').textContent = t.aThNumber;
+            document.getElementById('aThCustomer').textContent = t.aThCustomer;
+            document.getElementById('aThServices').textContent = t.aThServices;
+            document.getElementById('aThAmount').textContent = t.aThAmount;
+            document.getElementById('aThDate').textContent = t.aThDate;
+            document.getElementById('aThStatus').textContent = t.aThStatus;
+            document.getElementById('aThActions').textContent = t.aThActions;
+            document.getElementById('servicesMgmtTitle').textContent = t.servicesMgmtTitle;
+            document.getElementById('addServiceBtn').textContent = t.addService;
+            document.getElementById('staffMgmtTitle').textContent = t.staffMgmtTitle;
+            document.getElementById('addStaffBtn').textContent = t.addStaff;
+            document.getElementById('stThName').textContent = t.stThName;
+            document.getElementById('stThStatus').textContent = t.stThStatus;
+            document.getElementById('stThActions').textContent = t.stThActions;
+            document.getElementById('settingsTitle').textContent = t.settingsTitle;
+            document.getElementById('workHoursTitle').textContent = t.workHoursTitle;
+            document.getElementById('startLabel').textContent = t.startLabel;
+            document.getElementById('endLabel').textContent = t.endLabel;
+            document.getElementById('saveSettingsBtn').textContent = t.saveSettings;
+            document.getElementById('sNameLabel').textContent = t.sNameLabel;
+            document.getElementById('sPriceLabel').textContent = t.sPriceLabel;
+            document.getElementById('sCategoryLabel').textContent = t.sCategoryLabel;
+            document.getElementById('sActiveLabel').textContent = t.sActiveLabel;
+            document.getElementById('saveServiceBtn').textContent = t.save;
+            document.getElementById('cancelServiceBtn').textContent = t.cancel;
+            document.getElementById('stNameLabel').textContent = t.stNameLabel;
+            document.getElementById('stActiveLabel').textContent = t.stActiveLabel;
+            document.getElementById('saveStaffBtn').textContent = t.save;
+            document.getElementById('cancelStaffBtn').textContent = t.cancel;
+            document.getElementById('bNavDashboard').textContent = t.navDashboard;
+            document.getElementById('bNavApprovals').textContent = t.navApprovals;
+            document.getElementById('bNavQueue').textContent = t.navQueue;
+            document.getElementById('bNavBookings').textContent = t.navBookings;
+            document.getElementById('bNavServices').textContent = t.navServices;
+
+            // Install
+            const fabText = document.getElementById('installFabText');
+            if (fabText) {
+                if (isAppInstalled) {
+                    fabText.textContent = t.installed || '✅ مثبت';
+                } else {
+                    fabText.textContent = t.installFabLabel || 'تثبيت التطبيق';
+                }
+            }
+            const installBadge = document.querySelector('.install-fab .fab-badge');
+            if (installBadge && !isAppInstalled) {
+                installBadge.textContent = t.installBadge || 'جديد';
+            } else if (installBadge) {
+                installBadge.textContent = '';
+                installBadge.style.display = 'none';
+            }
+            document.getElementById('installOverlayTitle').textContent = t.installTitle || 'تثبيت التطبيق';
+            document.getElementById('installOverlayDesc').textContent = t.installDesc ||
+                'أضف صالوني إلى شاشة رئيسيتك للوصول السريع';
+            document.getElementById('installHintText').textContent = t.installHint ||
+                'اضغط على زر المشاركة ثم اختر "أضف إلى الشاشة الرئيسية"';
+            document.getElementById('installDoneBtn').textContent = t.installDone || '✔ فهمت';
+            updateInstallSteps();
+
+            const flags = { ar: '🇸🇦', en: '🇬🇧', ur: '🇵🇰' };
+            const labels = { ar: 'العربية', en: 'English', ur: 'اردو' };
+            document.getElementById('currentFlag').textContent = flags[currentLanguage] || '🇸🇦';
+            document.getElementById('currentLangLabel').textContent = labels[currentLanguage] || 'العربية';
+            document.querySelectorAll('.lang-option').forEach(opt => {
+                opt.classList.toggle('active', opt.dataset.lang === currentLanguage);
+            });
+            renderApprovals();
+            renderQueue();
+            renderTodayBookings();
+            renderAllAppointments();
+            renderServices();
+            renderStaff();
+            updateStats();
+            updateWorkHoursNote();
+        }
+
+        window.toggleLangDropdown = function() {
+            const dropdown = document.getElementById('langDropdown');
+            const toggle = document.getElementById('langToggle');
+            if (dropdown) dropdown.classList.toggle('open');
+            if (toggle) toggle.classList.toggle('open');
+        };
+
+        window.setLanguage = function(lang) {
+            currentLanguage = lang;
+            localStorage.setItem('admin_preferred_language', lang);
+            applyTranslations();
+            const dropdown = document.getElementById('langDropdown');
+            const toggle = document.getElementById('langToggle');
+            if (dropdown) dropdown.classList.remove('open');
+            if (toggle) toggle.classList.remove('open');
+            showToast(getTranslation('toastSaved') + ' (' + (lang === 'ar' ? 'العربية' : lang === 'en' ? 'English' : 'اردو') +
+                ')', 'success');
+        };
+
+        // ===== THEME =====
+        window.toggleTheme = function() {
+            isLightMode = !isLightMode;
+            const root = document.documentElement;
+            const toggle = document.getElementById('themeToggle');
+            const icon = document.getElementById('themeIcon');
+            if (isLightMode) {
+                root.setAttribute('data-theme', 'light');
+                toggle.classList.add('light');
+                icon.textContent = '☀️';
+            } else {
+                root.removeAttribute('data-theme');
+                toggle.classList.remove('light');
+                icon.textContent = '🌙';
+            }
+        };
+
+        // ===== SIDEBAR =====
+        function closeSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            if (sidebar) sidebar.classList.remove('open');
+            if (overlay) overlay.classList.remove('active');
+        }
+        window.closeSidebar = closeSidebar;
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            if (sidebar) sidebar.classList.toggle('open');
+            if (overlay) overlay.classList.toggle('active');
+        }
+        window.toggleSidebar = toggleSidebar;
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeSidebar();
+        });
+
+        // ===== MODAL =====
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+        window.closeModal = closeModal;
+
+        // ===== SECTION SWITCHING =====
+        let currentSection = 'dashboard';
+
+        window.switchSection = function(section, el) {
+            currentSection = section;
+            document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.sidebar-nav li').forEach(l => l.classList.remove('active'));
+            const sec = document.getElementById('sec-' + section);
+            if (sec) sec.classList.add('active');
+            if (el) el.classList.add('active');
+            document.querySelectorAll('#bottomNav .nav-item').forEach(b => {
+                b.classList.toggle('active', b.dataset.section === section);
+            });
+            if (window.innerWidth < 769) closeSidebar();
+            if (section === 'approvals') renderApprovals();
+            if (section === 'queue') renderQueue();
+            if (section === 'bookings') renderTodayBookings();
+            if (section === 'all') renderAllAppointments();
+            if (section === 'services') renderServices();
+            if (section === 'staff') renderStaff();
+            if (section === 'dashboard') updateStats();
+        };
+
+        window.switchSectionMobile = function(section) {
+            const li = document.querySelector(`.sidebar-nav li[data-section="${section}"]`);
+            switchSection(section, li);
+        };
+
+        // ===== STATUS HELPERS =====
+        function getStatusText(status) {
+            const t = translations[currentLanguage];
+            const map = {
+                'pending_approval': t.statusPendingApproval || '⏳ قيد المراجعة',
+                'pending': t.statusPending || '⏳ في الانتظار',
+                'in_progress': t.statusInProgress || '🔄 جاري',
+                'completed': t.statusCompleted || '✅ مكتمل',
+                'cancelled': t.statusCancelled || '✖ ملغي'
+            };
+            return map[status] || status;
+        }
+
+        function getStatusBadge(status) {
+            const map = {
+                'pending_approval': `<span class="badge badge-pending_approval">${getStatusText(status)}</span>`,
+                'pending': `<span class="badge badge-pending">${getStatusText(status)}</span>`,
+                'in_progress': `<span class="badge badge-in_progress">${getStatusText(status)}</span>`,
+                'completed': `<span class="badge badge-completed">${getStatusText(status)}</span>`,
+                'cancelled': `<span class="badge badge-cancelled">${getStatusText(status)}</span>`
+            };
+            return map[status] || status;
+        }
+
+        function getCategoryClass(category) {
+            const map = {
+                'حلاقة': 'hair',
+                'صبغة': 'dye',
+                'عناية': 'care',
+                'إضافات': 'extras',
+                'مناسبات': 'events'
+            };
+            return map[category] || '';
+        }
+
+        // ===== BADGE (إشعارات على الأيقونة) =====
+        async function updateBadge(count) {
+            try {
+                if (navigator.setAppBadge) {
+                    if (count > 0) {
+                        await navigator.setAppBadge(count);
+                    } else {
+                        await navigator.clearAppBadge();
+                    }
+                    console.log('✅ Badge updated:', count);
+                } else {
+                    const title = getTranslation('appTitle') || 'المدير';
+                    if (count > 0) {
+                        document.title = `(${count}) ${title}`;
+                    } else {
+                        document.title = title;
+                    }
+                }
+            } catch (e) {
+                console.warn('Badge API not available:', e);
+            }
+        }
+
+        // ===== DYNAMIC MANIFEST =====
+        function createDynamicManifest() {
+            const manifest = {
+                name: 'مدير الصالون',
+                short_name: 'المدير',
+                description: 'لوحة تحكم الصالون',
+                start_url: window.location.href,
+                display: 'standalone',
+                background_color: '#0A0A0A',
+                theme_color: '#D4AF37',
+                orientation: 'portrait',
+                lang: 'ar',
+                dir: 'rtl',
+                icons: [
+                    { src: 'icon-152.png', sizes: '152x152', type: 'image/png', purpose: 'any' },
+                    { src: 'icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' }
+                ]
+            };
+            const blob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            // إزالة أي manifest سابق
+            document.querySelector('link[rel="manifest"]')?.remove();
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+            console.log('✅ Dynamic manifest created for:', window.location.href);
+        }
+
+        // ===== LOAD DATA =====
+        async function loadData() {
+            if (!isGistConfigured) return;
+            try {
+                const cache = db.getCache();
+                allServices = cache.services || [];
+                allStaff = cache.staff || [];
+                allAppointments = cache.appointments || [];
+                const settings = cache.settings || {};
+                document.getElementById('workStart').value = settings.workStart || '09:00';
+                document.getElementById('workEnd').value = settings.workEnd || '17:00';
+                updateWorkHoursNote();
+
+                const pendingApprovalCount = allAppointments.filter(a => a.status === 'pending_approval').length;
+                updateBadge(pendingApprovalCount);
+
+                updateStats();
+                renderApprovals();
+                renderQueue();
+                renderTodayBookings();
+                renderAllAppointments();
+                renderServices();
+                renderStaff();
+                applyTranslations();
+                document.getElementById('filterDate').value = currentFilterDate;
+                console.log('✅ Admin: Data loaded at', new Date().toISOString());
+            } catch (e) {
+                console.error('Load data error:', e);
+                showToast('خطأ في تحميل البيانات: ' + e.message, 'error');
+            }
+        }
+
+        function forceRefresh() {
+            if (!isGistConfigured) return;
+            loadData();
+            console.log('🔄 Admin: Force refresh via polling');
+        }
+
+        // ===== REAL-TIME =====
+        function startPolling() {
+            db.on('appointments', (payload, appointments) => {
+                const oldPendingApprovalIds = new Set(previousPendingApprovalIds);
+                const newPendingApprovalIds = new Set(
+                    (appointments || []).filter(a => a.status === 'pending_approval').map(a => a.id)
+                );
+                for (const id of newPendingApprovalIds) {
+                    if (!oldPendingApprovalIds.has(id)) {
+                        playNewBookingSound();
+                        showToast('🔔 حجز جديد ينتظر الموافقة!', 'success');
+                        break;
+                    }
+                }
+                allAppointments = appointments || [];
+                updateStats();
+                renderApprovals();
+                renderQueue();
+                renderTodayBookings();
+                renderAllAppointments();
+                previousPendingApprovalIds = newPendingApprovalIds;
+
+                const pendingApprovalCount = allAppointments.filter(a => a.status === 'pending_approval').length;
+                updateBadge(pendingApprovalCount);
+
+                console.log('🔄 Admin: Real-time update on appointments');
+            });
+
+            db.on('services', (payload, services) => {
+                allServices = services || [];
+                renderServices();
+                console.log('🔄 Admin: Real-time update on services');
+            });
+
+            db.on('staff', (payload, staff) => {
+                allStaff = staff || [];
+                renderStaff();
+                console.log('🔄 Admin: Real-time update on staff');
+            });
+
+            db.on('settings', (payload, settings) => {
+                if (settings) {
+                    document.getElementById('workStart').value = settings.workStart || '09:00';
+                    document.getElementById('workEnd').value = settings.workEnd || '17:00';
+                    updateWorkHoursNote();
+                }
+                console.log('🔄 Admin: Real-time update on settings');
+            });
+
+            if (pollingInterval) clearInterval(pollingInterval);
+            pollingInterval = setInterval(forceRefresh, 8000);
+            console.log('✅ Admin: Realtime listeners + polling registered');
+        }
+
+        // ===== STATS =====
+        function updateStats() {
+            const today = new Date().toISOString().split('T')[0];
+            const pendingApproval = allAppointments.filter(a => a.status === 'pending_approval').length;
+            const pending = allAppointments.filter(a => a.status === 'pending').length;
+            const progress = allAppointments.filter(a => a.status === 'in_progress').length;
+            const todayCount = allAppointments.filter(a => a.date === today).length;
+
+            document.getElementById('statPendingApproval').textContent = pendingApproval;
+            document.getElementById('statPending').textContent = pending;
+            document.getElementById('statProgress').textContent = progress;
+            document.getElementById('statToday').textContent = todayCount;
+            document.getElementById('approvalsBadge').textContent = pendingApproval;
+
+            const current = allAppointments.find(a => a.status === 'in_progress');
+            const display = document.getElementById('currentServingDisplay');
+            if (display) display.textContent = current ? `#${current.queue_number}` : '--';
+
+            const recent = allAppointments.slice(0, 5);
+            const activity = document.getElementById('recentActivity');
+            if (recent.length) {
+                activity.innerHTML = recent.map(a =>
+                    `<div style="padding:10px 0;border-bottom:1px solid var(--border-subtle);display:flex;justify-content:space-between;align-items:center;">
+                        <span style="font-size:15px;">${a.customer_name || 'عميل'} - ${a.service_names || 'خدمات متعددة'}</span>
+                        <span class="text-muted text-sm">${getStatusText(a.status)}</span>
+                    </div>`
+                ).join('');
+            } else {
+                activity.textContent = getTranslation('noData');
+            }
+        }
+
+        // ===== APPROVALS =====
+        function renderApprovals() {
+            const tbody = document.getElementById('approvalsBody');
+            if (!tbody) return;
+            const list = allAppointments.filter(a => a.status === 'pending_approval')
+                .sort((a, b) => (a.queue_number || 0) - (b.queue_number || 0));
+            if (!list.length) {
+                tbody.innerHTML =
+                    `<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--text-muted);font-size:15px;">${getTranslation('noApprovals')}</td></tr>`;
+                document.getElementById('approvalsCount').textContent = '0';
+                return;
+            }
+            document.getElementById('approvalsCount').textContent = list.length;
+            tbody.innerHTML = list.map(a => `
+                <tr>
+                    <td><strong style="font-size:16px;">#${a.queue_number}</strong></td>
+                    <td style="font-size:15px;">${a.customer_name || 'عميل'}</td>
+                    <td style="font-size:14px;">${a.service_names || 'خدمات متعددة'}</td>
+                    <td style="font-size:15px;font-weight:600;color:var(--gold);">${a.total_price || 0} ريال</td>
+                    <td style="font-size:14px;">${a.staff_name || 'غير محدد'}</td>
+                    <td>${getStatusBadge(a.status)}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn btn-success btn-sm" onclick="approveBooking('${a.id}')">${getTranslation('approve')}</button>
+                            <button class="btn btn-danger btn-sm" onclick="rejectBooking('${a.id}')">${getTranslation('reject')}</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        window.approveBooking = async function(id) {
+            try {
+                const today = new Date().toISOString().split('T')[0];
+                const activeAppointments = allAppointments.filter(a =>
+                    a.date === today &&
+                    (a.status === 'pending' || a.status === 'in_progress' || a.status === 'pending_approval')
+                );
+                let maxNum = 0;
+                activeAppointments.forEach(a => {
+                    if (a.queue_number && a.queue_number > maxNum) maxNum = a.queue_number;
+                });
+                const newQueueNum = maxNum + 1;
+                await db.updateAppointment(id, {
+                    status: 'pending',
+                    queue_number: newQueueNum,
+                    date: today
+                });
+                playActionSound();
+                showToast(getTranslation('toastApproved') + ' - رقم الدور #' + newQueueNum, 'success');
+            } catch (e) {
+                showToast(getTranslation('toastError') + ': ' + e.message, 'error');
+            }
+        };
+
+        window.rejectBooking = async function(id) {
+            try {
+                await db.updateAppointment(id, { status: 'cancelled' });
+                playActionSound();
+                showToast(getTranslation('toastRejected'), 'info');
+            } catch (e) {
+                showToast(getTranslation('toastError') + ': ' + e.message, 'error');
+            }
+        };
+
+        // ===== QUEUE =====
+        function renderQueue() {
+            const tbody = document.getElementById('queueBody');
+            if (!tbody) return;
+            const list = allAppointments.filter(a => a.status === 'pending' || a.status === 'in_progress')
+                .sort((a, b) => (a.queue_number || 0) - (b.queue_number || 0));
+            if (!list.length) {
+                tbody.innerHTML =
+                    `<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text-muted);font-size:15px;">${getTranslation('noQueue')}</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = list.map(a => `
+                <tr>
+                    <td><strong style="font-size:16px;">#${a.queue_number}</strong></td>
+                    <td style="font-size:15px;">${a.customer_name || 'عميل'}</td>
+                    <td style="font-size:14px;">${a.service_names || 'خدمات متعددة'}</td>
+                    <td style="font-size:15px;font-weight:600;color:var(--gold);">${a.total_price || 0} ريال</td>
+                    <td>${getStatusBadge(a.status)}</td>
+                    <td>
+                        <div class="action-buttons">
+                            ${a.status === 'pending' ? `<button class="btn btn-success btn-sm" onclick="startService('${a.id}')">${getTranslation('start')}</button>` : ''}
+                            ${a.status === 'in_progress' ? `<button class="btn btn-outline btn-sm" onclick="completeService('${a.id}')">${getTranslation('complete')}</button>` : ''}
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        window.startService = async function(id) {
+            try {
+                await db.updateAppointment(id, { status: 'in_progress' });
+                playActionSound();
+                showToast(getTranslation('toastStarted'), 'success');
+            } catch (e) { showToast(getTranslation('toastError'), 'error'); }
+        };
+
+        window.completeService = async function(id) {
+            try {
+                await db.updateAppointment(id, { status: 'completed' });
+                playActionSound();
+                showToast(getTranslation('toastCompleted'), 'success');
+                setTimeout(() => nextTurn(), 500);
+            } catch (e) { showToast(getTranslation('toastError'), 'error'); }
+        };
+
+        window.nextTurn = function() {
+            const pending = allAppointments.filter(a => a.status === 'pending')
+                .sort((a, b) => (a.queue_number || 0) - (b.queue_number || 0));
+            if (!pending.length) {
+                showToast(getTranslation('toastNoPending'), 'error');
+                return;
+            }
+            startService(pending[0].id);
+        };
+
+        window.completeCurrent = function() {
+            const current = allAppointments.find(a => a.status === 'in_progress');
+            if (!current) {
+                showToast(getTranslation('toastNoCurrent'), 'error');
+                return;
+            }
+            completeService(current.id);
+        };
+
+        // ===== BOOKINGS =====
+        function renderTodayBookings() {
+            const container = document.getElementById('todayBookingsContainer');
+            if (!container) return;
+            const today = new Date().toISOString().split('T')[0];
+            const todayBookings = allAppointments.filter(a => a.date === today);
+            const t = translations[currentLanguage];
+            if (todayBookings.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align:center;padding:30px;color:var(--text-muted);">
+                        <span style="font-size:32px;">📭</span><br>
+                        <span style="font-size:16px;font-weight:600;">${t.noBookings || 'لا توجد حجوزات اليوم'}</span>
+                    </div>
+                `;
+                document.getElementById('bookingsCount').textContent = '0';
+                return;
+            }
+            document.getElementById('bookingsCount').textContent = todayBookings.length;
+            let html = `<div style="display:flex;flex-direction:column;gap:10px;">`;
+            const sorted = todayBookings.sort((a, b) => (a.queue_number || 0) - (b.queue_number || 0));
+            sorted.forEach(a => {
+                const statusText = getStatusText(a.status);
+                const statusClass = a.status === 'pending_approval' ? 'badge-pending_approval' :
+                    a.status === 'pending' ? 'badge-pending' :
+                    a.status === 'in_progress' ? 'badge-in_progress' :
+                    a.status === 'completed' ? 'badge-completed' : 'badge-cancelled';
+                html += `
+                    <div style="background:rgba(255,255,255,0.03);border-radius:var(--radius-sm);padding:14px 16px;border:1px solid var(--border-subtle);">
+                        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+                            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                                <strong style="font-size:16px;color:var(--gold);">#${a.queue_number || '--'}</strong>
+                                <span style="font-size:15px;font-weight:600;">${a.customer_name || 'عميل'}</span>
+                                <span style="font-size:13px;color:var(--text-muted);">${a.service_names || 'خدمات متعددة'}</span>
+                            </div>
+                            <span class="badge ${statusClass}">${statusText}</span>
+                        </div>
+                        <div style="display:flex;gap:16px;margin-top:6px;font-size:13px;color:var(--text-muted);flex-wrap:wrap;">
+                            <span>💰 ${a.total_price || 0} ريال</span>
+                            ${a.staff_name ? `<span>👨‍💼 ${a.staff_name}</span>` : ''}
+                            ${a.date ? `<span>📅 ${a.date}</span>` : ''}
+                            ${a.time ? `<span>⏰ ${a.time}</span>` : ''}
+                        </div>
+                        <div style="margin-top:6px;font-size:12px;color:var(--text-muted);">
+                            ${a.services && a.services.length > 0 ? 
+                                a.services.map(s => `<span style="display:inline-block;padding:2px 10px;background:rgba(212,175,55,0.08);border-radius:40px;margin:2px;">${s.name || s}</span>`).join(' ') : 
+                                a.service_names || ''
+                            }
+                        </div>
+                    </div>
+                `;
+            });
+            html += `</div>`;
+            container.innerHTML = html;
+        }
+
+        // ===== ALL APPOINTMENTS =====
+        function renderAllAppointments() {
+            const tbody = document.getElementById('allAppointmentsBody');
+            if (!tbody) return;
+            let list = allAppointments;
+            if (currentFilterDate) {
+                list = list.filter(a => a.date === currentFilterDate);
+            }
+            list = list.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+            if (!list.length) {
+                tbody.innerHTML =
+                    `<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--text-muted);font-size:15px;">${getTranslation('noAppointments')}</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = list.map(a => `
+                <tr>
+                    <td style="font-size:15px;font-weight:600;">${a.queue_number ? '#'+a.queue_number : '--'}</td>
+                    <td style="font-size:15px;">${a.customer_name || 'عميل'}</td>
+                    <td style="font-size:14px;">${a.service_names || 'خدمات متعددة'}</td>
+                    <td style="font-size:15px;font-weight:600;color:var(--gold);">${a.total_price || 0} ريال</td>
+                    <td style="font-size:14px;">${a.date || '--'}</td>
+                    <td>${getStatusBadge(a.status)}</td>
+                    <td>
+                        ${a.status !== 'cancelled' && a.status !== 'completed' && a.status !== 'pending_approval' ? 
+                            `<button class="btn btn-danger btn-sm" onclick="cancelAppointment('${a.id}')">${getTranslation('cancelAppointment')}</button>` : 
+                            '<span class="text-muted text-sm">--</span>'
+                        }
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        window.cancelAppointment = async function(id) {
+            if (!confirm(getTranslation('cancelAppointment') + '؟')) return;
+            try {
+                await db.updateAppointment(id, { status: 'cancelled' });
+                playActionSound();
+                showToast(getTranslation('toastCancelled'), 'info');
+            } catch (e) { showToast(getTranslation('toastError'), 'error'); }
+        };
+
+        // ===== SERVICES =====
+        window.toggleServiceCategory = function(category) {
+            if (openCategory && openCategory !== category) {
+                const prevAccordion = document.querySelector(`[data-category="${openCategory}"]`);
+                if (prevAccordion) {
+                    prevAccordion.querySelector('.service-category-body').classList.remove('open');
+                    prevAccordion.querySelector('.service-category-header').classList.remove('open');
+                }
+            }
+            const accordion = document.querySelector(`[data-category="${category}"]`);
+            if (accordion) {
+                const body = accordion.querySelector('.service-category-body');
+                const header = accordion.querySelector('.service-category-header');
+                const isOpen = body.classList.contains('open');
+                if (isOpen) {
+                    body.classList.remove('open');
+                    header.classList.remove('open');
+                    openCategory = null;
+                } else {
+                    body.classList.add('open');
+                    header.classList.add('open');
+                    openCategory = category;
+                }
+            }
+        };
+
+        function renderServices() {
+            const container = document.getElementById('servicesContainer');
+            if (!container) return;
+            if (!allServices.length) {
+                container.innerHTML = `
+                    <div style="text-align:center;padding:30px;color:var(--text-muted);">
+                        <span style="font-size:32px;">📭</span><br>
+                        <span style="font-size:16px;font-weight:600;">${getTranslation('noServices')}</span>
+                    </div>
+                `;
+                return;
+            }
+            const categories = {};
+            allServices.forEach(s => {
+                const cat = s.category || 'خدمات';
+                if (!categories[cat]) categories[cat] = [];
+                categories[cat].push(s);
+            });
+            const categoryOrder = ['حلاقة', 'صبغة', 'عناية', 'إضافات', 'مناسبات'];
+            const sortedCategories = Object.keys(categories).sort((a, b) => {
+                const idxA = categoryOrder.indexOf(a);
+                const idxB = categoryOrder.indexOf(b);
+                if (idxA === -1) return 1;
+                if (idxB === -1) return -1;
+                return idxA - idxB;
+            });
+            let html = '';
+            sortedCategories.forEach(cat => {
+                const services = categories[cat];
+                const isOpen = openCategory === cat;
+                const categoryClass = getCategoryClass(cat);
+                html += `
+                    <div class="service-category-accordion" data-category="${cat}">
+                        <button class="service-category-header ${isOpen ? 'open' : ''}" onclick="toggleServiceCategory('${cat}')">
+                            <span>${cat}</span>
+                            <span class="arrow">▼</span>
+                        </button>
+                        <div class="service-category-body ${isOpen ? 'open' : ''}">
+                            ${services.map(s => {
+                                const isActive = s.active !== false;
+                                const serviceName = getServiceName(s);
+                                return `
+                                    <div class="service-item">
+                                        <div class="service-info">
+                                            <span class="service-name">${serviceName}</span>
+                                            <span class="service-price">${s.price || 0} ريال</span>
+                                            <span class="category-badge ${categoryClass}">${cat}</span>
+                                        </div>
+                                        <div class="service-status">
+                                            ${isActive ? '<span class="badge badge-active">✅ مفعل</span>' : '<span class="badge badge-inactive">⛔ غير مفعل</span>'}
+                                        </div>
+                                        <div class="service-actions">
+                                            <button class="btn btn-outline btn-sm" onclick="editService('${s.id}')">✏️</button>
+                                            <button class="btn ${isActive ? 'btn-danger' : 'btn-success'} btn-sm" onclick="toggleServiceActive('${s.id}', ${!isActive})">
+                                                ${isActive ? '⛔' : '✅'}
+                                            </button>
+                                            <button class="btn btn-danger btn-sm" onclick="deleteService('${s.id}')">🗑</button>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        window.toggleServiceActive = async function(id, newStatus) {
+            try {
+                await db.updateService(id, { active: newStatus });
+                showToast(newStatus ? '✅ تم تفعيل الخدمة' : '⛔ تم إخفاء الخدمة', 'success');
+            } catch (e) {
+                showToast(getTranslation('toastError') + ': ' + e.message, 'error');
+            }
+        };
+
+        window.openServiceModal = function(id) {
+            document.getElementById('serviceEditId').value = '';
+            document.getElementById('serviceName').value = '';
+            document.getElementById('servicePrice').value = '';
+            document.getElementById('serviceCategory').value = 'حلاقة';
+            document.getElementById('serviceActive').checked = true;
+            document.getElementById('serviceModalTitle').textContent = getTranslation('modalAdd') + ' ' + getTranslation(
+                'sNameLabel');
+            if (id) {
+                const s = allServices.find(x => x.id === id);
+                if (s) {
+                    document.getElementById('serviceEditId').value = id;
+                    document.getElementById('serviceName').value = s.name_ar || s.name || '';
+                    document.getElementById('servicePrice').value = s.price || '';
+                    document.getElementById('serviceCategory').value = s.category || 'حلاقة';
+                    document.getElementById('serviceActive').checked = s.active !== false;
+                    document.getElementById('serviceModalTitle').textContent = getTranslation('modalEdit') + ' ' +
+                        getTranslation('sNameLabel');
+                }
+            }
+            document.getElementById('serviceModal').classList.add('active');
+        };
+
+        window.editService = function(id) { openServiceModal(id); };
+
+        window.saveService = async function() {
+            const editId = document.getElementById('serviceEditId').value;
+            const name_ar = document.getElementById('serviceName').value.trim();
+            const price = parseInt(document.getElementById('servicePrice').value) || 0;
+            const category = document.getElementById('serviceCategory').value;
+            const active = document.getElementById('serviceActive').checked;
+            if (!name_ar) {
+                showToast('الرجاء إدخال اسم الخدمة', 'error');
+                return;
+            }
+            try {
+                if (editId) {
+                    await db.updateService(editId, {
+                        name_ar,
+                        name_en: name_ar,
+                        name_ur: name_ar,
+                        price,
+                        category,
+                        active
+                    });
+                } else {
+                    await db.addService({
+                        id: 'svc_' + Date.now(),
+                        name_ar,
+                        name_en: name_ar,
+                        name_ur: name_ar,
+                        price,
+                        category,
+                        active
+                    });
+                }
+                showToast(getTranslation('toastSaved'), 'success');
+                closeModal('serviceModal');
+            } catch (e) {
+                showToast(getTranslation('toastError') + ': ' + e.message, 'error');
+            }
+        };
+
+        window.deleteService = async function(id) {
+            if (!confirm('هل أنت متأكد من حذف هذه الخدمة؟')) return;
+            try {
+                await db.deleteService(id);
+                showToast(getTranslation('toastDeleted'), 'success');
+            } catch (e) { showToast(getTranslation('toastError'), 'error'); }
+        };
+
+        // ===== STAFF =====
+        function renderStaff() {
+            const tbody = document.getElementById('staffBody');
+            if (!tbody) return;
+            if (!allStaff.length) {
+                tbody.innerHTML =
+                    `<tr><td colspan="3" style="text-align:center;padding:30px;color:var(--text-muted);font-size:15px;">${getTranslation('noStaff')}</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = allStaff.map(s => {
+                const isActive = s.active !== false;
+                const name = getStaffName(s);
+                return `
+                <tr>
+                    <td style="font-size:15px;font-weight:600;">${name}</td>
+                    <td>${isActive ? '<span class="badge badge-active">✅ مفعل</span>' : '<span class="badge badge-inactive">⛔ غير مفعل</span>'}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn btn-outline btn-sm" onclick="editStaff('${s.id}')">✏️ تعديل</button>
+                            <button class="btn ${isActive ? 'btn-danger' : 'btn-success'} btn-sm" onclick="toggleStaffActive('${s.id}', ${!isActive})">
+                                ${isActive ? '⛔ إخفاء' : '✅ تفعيل'}
+                            </button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteStaff('${s.id}')">🗑 حذف</button>
+                        </div>
+                    </td>
+                </tr>
+            `}).join('');
+        }
+
+        window.toggleStaffActive = async function(id, newStatus) {
+            try {
+                await db.updateStaff(id, { active: newStatus });
+                showToast(newStatus ? '✅ تم تفعيل الحلاق' : '⛔ تم إخفاء الحلاق', 'success');
+            } catch (e) {
+                showToast(getTranslation('toastError') + ': ' + e.message, 'error');
+            }
+        };
+
+        window.openStaffModal = function(id) {
+            document.getElementById('staffEditId').value = '';
+            document.getElementById('staffName').value = '';
+            document.getElementById('staffActive').checked = true;
+            document.getElementById('staffModalTitle').textContent = getTranslation('modalAdd') + ' ' + getTranslation(
+                'stNameLabel');
+            if (id) {
+                const s = allStaff.find(x => x.id === id);
+                if (s) {
+                    document.getElementById('staffEditId').value = id;
+                    document.getElementById('staffName').value = s.name_ar || s.name || '';
+                    document.getElementById('staffActive').checked = s.active !== false;
+                    document.getElementById('staffModalTitle').textContent = getTranslation('modalEdit') + ' ' +
+                        getTranslation('stNameLabel');
+                }
+            }
+            document.getElementById('staffModal').classList.add('active');
+        };
+
+        window.editStaff = function(id) { openStaffModal(id); };
+
+        window.saveStaff = async function() {
+            const editId = document.getElementById('staffEditId').value;
+            const name_ar = document.getElementById('staffName').value.trim();
+            const active = document.getElementById('staffActive').checked;
+            if (!name_ar) {
+                showToast('الرجاء إدخال اسم الحلاق', 'error');
+                return;
+            }
+            try {
+                if (editId) {
+                    await db.updateStaff(editId, {
+                        name_ar,
+                        name_en: name_ar,
+                        name_ur: name_ar,
+                        active
+                    });
+                } else {
+                    await db.addStaff({
+                        id: 'stf_' + Date.now(),
+                        name_ar,
+                        name_en: name_ar,
+                        name_ur: name_ar,
+                        active
+                    });
+                }
+                showToast(getTranslation('toastSaved'), 'success');
+                closeModal('staffModal');
+            } catch (e) {
+                showToast(getTranslation('toastError') + ': ' + e.message, 'error');
+            }
+        };
+
+        window.deleteStaff = async function(id) {
+            if (!confirm('هل أنت متأكد من حذف هذا الحلاق؟')) return;
+            try {
+                await db.deleteStaff(id);
+                showToast(getTranslation('toastDeleted'), 'success');
+            } catch (e) { showToast(getTranslation('toastError'), 'error'); }
+        };
+
+        // ===== SETTINGS =====
+        function updateWorkHoursNote() {
+            const start = document.getElementById('workStart').value;
+            const end = document.getElementById('workEnd').value;
+            const note = document.getElementById('workHoursNote');
+            if (!note) return;
+            if (!start || !end) {
+                note.textContent = '';
+                return;
+            }
+            const [sH, sM] = start.split(':').map(Number);
+            const [eH, eM] = end.split(':').map(Number);
+            const startMinutes = sH * 60 + sM;
+            let endMinutes = eH * 60 + eM;
+            let isExtended = false;
+            if (endMinutes < startMinutes) {
+                endMinutes += 24 * 60;
+                isExtended = true;
+            }
+            const diffMinutes = endMinutes - startMinutes;
+            const diffHours = Math.floor(diffMinutes / 60);
+            const diffMins = diffMinutes % 60;
+            let msg = `مدة الدوام: ${diffHours} ساعة`;
+            if (diffMins > 0) msg += ` و ${diffMins} دقيقة`;
+            if (isExtended) {
+                const t = getTranslation('extendsNextDay') || 'يمتد لليوم التالي';
+                msg += ` (${t})`;
+            }
+            if (diffHours === 0 && diffMins === 0) {
+                msg = '⚠️ دوام 24 ساعة (يبدأ وينتهي في نفس الوقت)';
+            }
+            note.textContent = msg;
+            note.style.color = isExtended ? 'var(--gold)' : 'var(--text-muted)';
+        }
+
+        window.setWorkHours = function(hours) {
+            const startInput = document.getElementById('workStart');
+            const endInput = document.getElementById('workEnd');
+            let start = startInput.value || '09:00';
+            if (hours === 24) {
+                startInput.value = '00:00';
+                endInput.value = '00:00';
+                updateWorkHoursNote();
+                showToast('تم ضبط الدوام على 24 ساعة (00:00 - 00:00)', 'success');
+                return;
+            }
+            const [h, m] = start.split(':').map(Number);
+            let endHours = h + hours;
+            let endMinutes = m;
+            if (endHours >= 24) {
+                endHours -= 24;
+            }
+            const end = String(endHours).padStart(2, '0') + ':' + String(endMinutes).padStart(2, '0');
+            endInput.value = end;
+            updateWorkHoursNote();
+            const t = getTranslation('toastSaved') || 'تم التحديث';
+            showToast(`${t}: نهاية الدوام ${end}`, 'success');
+        };
+
+        window.saveSettings = async function() {
+            const start = document.getElementById('workStart').value;
+            const end = document.getElementById('workEnd').value;
+            if (!start || !end) {
+                showToast('الرجاء إدخال أوقات العمل', 'error');
+                return;
+            }
+            const [sH, sM] = start.split(':').map(Number);
+            const [eH, eM] = end.split(':').map(Number);
+            if (isNaN(sH) || isNaN(sM) || isNaN(eH) || isNaN(eM)) {
+                showToast('الرجاء إدخال وقت صحيح', 'error');
+                return;
+            }
+            try {
+                await db.updateSettings({ workStart: start, workEnd: end });
+                showToast(getTranslation('toastSettingsSaved'), 'success');
+                updateWorkHoursNote();
+            } catch (e) {
+                showToast(getTranslation('toastError') + ': ' + e.message, 'error');
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const startInput = document.getElementById('workStart');
+            const endInput = document.getElementById('workEnd');
+            if (startInput) {
+                startInput.addEventListener('change', updateWorkHoursNote);
+                startInput.addEventListener('input', updateWorkHoursNote);
+            }
+            if (endInput) {
+                endInput.addEventListener('change', updateWorkHoursNote);
+                endInput.addEventListener('input', updateWorkHoursNote);
+            }
+        });
+
+        // ===== LOGIN / LOGOUT =====
+        const PASS = "admin123";
+
+        window.login = function() {
+            const pass = document.getElementById('adminPass').value;
+            if (pass === PASS) {
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+                const savedLang = localStorage.getItem('admin_preferred_language');
+                if (savedLang && translations[savedLang]) {
+                    currentLanguage = savedLang;
+                }
+                db.init().then(connected => {
+                    if (connected) {
+                        isGistConfigured = true;
+                        document.getElementById('gistStatus').innerHTML =
+                            '<span style="color:#2ECC71;">✅ متصل بقاعدة البيانات (Supabase)</span>';
+                        loadData();
+                        startPolling();
+                    } else {
+                        document.getElementById('gistStatus').innerHTML =
+                            '<span style="color:#E74C3C;">⚠️ فشل الاتصال بقاعدة البيانات</span>';
+                        showToast('⚠️ فشل الاتصال بقاعدة البيانات', 'error');
+                    }
+                });
+                applyTranslations();
+                showToast(getTranslation('toastWelcome'), 'success');
+                setTimeout(() => checkInstallStatus(), 1000);
+            } else {
+                showToast(getTranslation('toastLoginError'), 'error');
+            }
+        };
+
+        window.logout = function() {
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('dashboard').style.display = 'none';
+            if (pollingInterval) clearInterval(pollingInterval);
+            closeSidebar();
+        };
+
+        // ================================================================
+        //  PWA INSTALL
+        // ================================================================
+
+        function isRunningStandalone() {
+            return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+        }
+
+        function detectIOS() {
+            return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        }
+
+        function checkInstallStatus() {
+            isIOS = detectIOS();
+            isAppInstalled = isRunningStandalone();
+            const fab = document.getElementById('installFab');
+            if (isAppInstalled) {
+                fab.style.display = 'none';
+                return;
+            }
+            if (isIOS || deferredPrompt) {
+                fab.style.display = 'flex';
+                const t = getTranslation('installFabLabel') || 'تثبيت التطبيق';
+                document.getElementById('installFabText').textContent = t;
+                const badge = fab.querySelector('.fab-badge');
+                if (badge) {
+                    badge.textContent = getTranslation('installBadge') || 'جديد';
+                    badge.style.display = 'inline-flex';
+                }
+                updateInstallSteps();
+            } else {
+                setTimeout(() => {
+                    if (!deferredPrompt && !isAppInstalled && !isIOS) {
+                        fab.style.display = 'flex';
+                        document.getElementById('installFabText').textContent =
+                            getTranslation('installFabLabel') || 'تثبيت التطبيق';
+                    }
+                }, 3000);
+            }
+        }
+
+        window.handleInstallClick = function() {
+            if (isAppInstalled) {
+                showToast(getTranslation('installed') || '✅ التطبيق مثبت بالفعل', 'info');
+                return;
+            }
+            if (isIOS) {
+                document.getElementById('installOverlay').classList.add('active');
+                updateInstallSteps();
+                return;
+            }
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        showToast('✅ تم تثبيت التطبيق بنجاح', 'success');
+                        isAppInstalled = true;
+                        document.getElementById('installFab').style.display = 'none';
+                    } else {
+                        showToast('❌ تم إلغاء التثبيت', 'info');
+                    }
+                    deferredPrompt = null;
+                });
+                return;
+            }
+            document.getElementById('installOverlay').classList.add('active');
+            updateInstallSteps();
+        };
+
+        function updateInstallSteps() {
+            const container = document.getElementById('installStepsContainer');
+            if (!container) return;
+            const t = translations[currentLanguage];
+            const isIOSDevice = detectIOS();
+            let steps = [];
+            if (isIOSDevice) {
+                steps = [
+                    { icon: '📤', title: t.installStep1 || 'اضغط على زر المشاركة',
+                        desc: t.installStep1Desc || 'أيقونة المربع مع السهم لأعلى' },
+                    { icon: '📱', title: t.installStep2 || 'اختر "أضف إلى الشاشة الرئيسية"',
+                        desc: t.installStep2Desc || 'مرر لأسفل واختر الخيار' },
+                    { icon: '✅', title: t.installStep3 || 'اضغط على "إضافة"',
+                        desc: t.installStep3Desc || 'سيظهر التطبيق على شاشة هاتفك' }
+                ];
+            } else if (deferredPrompt) {
+                steps = [
+                    { icon: '📲', title: t.installAndroidStep1 || 'اضغط على زر "تثبيت"',
+                        desc: t.installAndroidStep1Desc || 'سيظهر طلب تثبيت التطبيق' },
+                    { icon: '⬇️', title: t.installAndroidStep2 || 'اختر "تثبيت"',
+                        desc: t.installAndroidStep2Desc || 'انتظر حتى يكتمل التثبيت' },
+                    { icon: '🚀', title: t.installAndroidStep3 || 'افتح التطبيق',
+                        desc: t.installAndroidStep3Desc || 'ستجده على شاشة هاتفك الرئيسية' }
+                ];
+            } else {
+                steps = [
+                    { icon: '📤', title: t.installStep1 || 'اضغط على زر المشاركة',
+                        desc: t.installStep1Desc || 'أيقونة المربع مع السهم لأعلى' },
+                    { icon: '📱', title: t.installStep2 || 'اختر "أضف إلى الشاشة الرئيسية"',
+                        desc: t.installStep2Desc || 'مرر لأسفل واختر الخيار' },
+                    { icon: '✅', title: t.installStep3 || 'اضغط على "إضافة"',
+                        desc: t.installStep3Desc || 'سيظهر التطبيق على شاشة هاتفك' }
+                ];
+            }
+            container.innerHTML = steps.map((step, idx) => `
+                <div class="install-step">
+                    <div class="step-num">${idx + 1}</div>
+                    <div class="step-content">
+                        <div class="step-title">${step.title}</div>
+                        <div class="step-desc">${step.desc}</div>
+                    </div>
+                    <span class="step-icon">${step.icon}</span>
+                </div>
+            `).join('');
+
+            const hint = document.getElementById('installHintText');
+            if (hint) {
+                if (isIOSDevice || !deferredPrompt) {
+                    hint.textContent = t.installHint || 'اضغط على زر المشاركة ثم اختر "أضف إلى الشاشة الرئيسية"';
+                } else {
+                    hint.textContent = t.installAndroidStep1Desc || 'سيظهر طلب تثبيت التطبيق';
+                }
+            }
+
+            const doneBtn = document.getElementById('installDoneBtn');
+            if (doneBtn) {
+                if (deferredPrompt && !isIOSDevice) {
+                    doneBtn.textContent = '📲 ' + (t.installNow || 'تثبيت الآن');
+                    doneBtn.onclick = function() {
+                        closeInstallOverlay();
+                        handleInstallClick();
+                    };
+                } else {
+                    doneBtn.textContent = t.installDone || '✔ فهمت';
+                    doneBtn.onclick = closeInstallOverlay;
+                }
+            }
+        }
+
+        window.closeInstallOverlay = function() {
+            document.getElementById('installOverlay').classList.remove('active');
+        };
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            const fab = document.getElementById('installFab');
+            if (!isAppInstalled && !isIOS) {
+                fab.style.display = 'flex';
+                document.getElementById('installFabText').textContent =
+                    getTranslation('installFabLabel') || 'تثبيت التطبيق';
+                const badge = fab.querySelector('.fab-badge');
+                if (badge) {
+                    badge.textContent = getTranslation('installBadge') || 'جديد';
+                    badge.style.display = 'inline-flex';
+                }
+                updateInstallSteps();
+            }
+            console.log('✅ beforeinstallprompt captured');
+        });
+
+        window.addEventListener('appinstalled', () => {
+            isAppInstalled = true;
+            document.getElementById('installFab').style.display = 'none';
+            showToast('✅ تم تثبيت التطبيق بنجاح!', 'success');
+            console.log('✅ App installed');
+        });
+
+        setInterval(() => {
+            const standalone = isRunningStandalone();
+            if (standalone !== isAppInstalled) {
+                isAppInstalled = standalone;
+                if (isAppInstalled) {
+                    document.getElementById('installFab').style.display = 'none';
+                } else {
+                    checkInstallStatus();
+                }
+            }
+        }, 5000);
+
+        // ===== SERVICE WORKER =====
+        function registerSW() {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('✅ Service Worker registered:', reg))
+                    .catch(err => console.warn('⚠️ SW registration failed:', err));
+            }
+        }
+
+        // ===== INIT =====
+        function init() {
+            createDynamicManifest();
+
+            const savedLang = localStorage.getItem('admin_preferred_language');
+            if (savedLang && translations[savedLang]) currentLanguage = savedLang;
+
+            document.addEventListener('click', function(e) {
+                const wrapper = document.querySelector('.lang-toggle-wrapper');
+                if (wrapper && !wrapper.contains(e.target)) {
+                    document.getElementById('langDropdown').classList.remove('open');
+                    document.getElementById('langToggle').classList.remove('open');
+                }
+            });
+
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') closeSidebar();
+            });
+
+            const filterDate = document.getElementById('filterDate');
+            if (filterDate) {
+                filterDate.value = currentFilterDate;
+                filterDate.addEventListener('change', function() {
+                    currentFilterDate = this.value;
+                    renderAllAppointments();
+                });
+            }
+
+            const startInput = document.getElementById('workStart');
+            const endInput = document.getElementById('workEnd');
+            if (startInput) {
+                startInput.addEventListener('change', updateWorkHoursNote);
+                startInput.addEventListener('input', updateWorkHoursNote);
+            }
+            if (endInput) {
+                endInput.addEventListener('change', updateWorkHoursNote);
+                endInput.addEventListener('input', updateWorkHoursNote);
+            }
+
+            registerSW();
+            applyTranslations();
+            updateWorkHoursNote();
+
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden && isGistConfigured) {
+                    loadData();
+                    checkInstallStatus();
+                }
+            });
+
+            setTimeout(checkInstallStatus, 1500);
+        }
+
+        init();
+    </script>
+
+</body>
+</html>

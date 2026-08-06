@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>غير متصل - صالوني</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background: #0A0A0A;
+            color: #FFFFFF;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            min-height: 100dvh;
+            text-align: center;
+            padding: 24px;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(255, 215, 0, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(255, 215, 0, 0.08) 0%, transparent 50%);
+        }
+
+        .offline-box {
+            max-width: 420px;
+            width: 100%;
+            padding: 40px 32px;
+            background: rgba(22, 22, 22, 0.95);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(212, 175, 55, 0.10);
+            border-radius: 30px;
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.8);
+            transition: all 0.4s ease;
+        }
+
+        .offline-box:hover {
+            border-color: rgba(212, 175, 55, 0.25);
+            box-shadow: 0 25px 45px -10px #000, 0 0 30px rgba(255, 215, 0, 0.04);
+        }
+
+        .offline-icon {
+            font-size: 80px;
+            margin-bottom: 16px;
+            display: block;
+            animation: floatIcon 3s ease-in-out infinite;
+        }
+
+        @keyframes floatIcon {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .offline-icon .fa-wifi {
+            color: #D4AF37;
+        }
+
+        .offline-icon .fa-slash {
+            color: #E74C3C;
+            position: relative;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 900;
+            color: #D4AF37;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .sub-text {
+            color: #B0A898;
+            font-size: 16px;
+            line-height: 1.7;
+            margin-bottom: 8px;
+        }
+
+        .sub-text .highlight {
+            color: #E8C84A;
+            font-weight: 700;
+        }
+
+        .divider {
+            width: 60px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #D4AF37, transparent);
+            margin: 16px auto;
+            border-radius: 2px;
+        }
+
+        .tips {
+            text-align: right;
+            padding: 16px 0;
+        }
+
+        .tips-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 0;
+            color: #B0A898;
+            font-size: 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .tips-item:last-child {
+            border-bottom: none;
+        }
+
+        .tips-item .tip-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(212, 175, 55, 0.08);
+            border: 1px solid rgba(212, 175, 55, 0.10);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: #D4AF37;
+            flex-shrink: 0;
+        }
+
+        .btn-retry {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+            padding: 16px 40px;
+            width: 100%;
+            background: linear-gradient(135deg, #D4AF37, #B8960F);
+            color: #0D0D0D;
+            border: none;
+            border-radius: 60px;
+            font-family: 'Tajawal', sans-serif;
+            font-size: 17px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 24px rgba(212, 175, 55, 0.25);
+            text-decoration: none;
+            min-height: 56px;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .btn-retry:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 36px rgba(212, 175, 55, 0.35);
+        }
+
+        .btn-retry:active {
+            transform: scale(0.96);
+        }
+
+        .btn-retry i {
+            font-size: 18px;
+        }
+
+        .footer-brand {
+            margin-top: 20px;
+            color: #666;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .footer-brand i {
+            color: #D4AF37;
+            font-size: 16px;
+        }
+
+        .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #E74C3C;
+            margin-left: 8px;
+            animation: pulseDot 1.5s infinite;
+        }
+
+        @keyframes pulseDot {
+            0%, 100% { opacity: 0.4; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 480px) {
+            .offline-box {
+                padding: 28px 20px;
+                border-radius: 24px;
+            }
+
+            .offline-icon {
+                font-size: 60px;
+            }
+
+            h1 {
+                font-size: 22px;
+            }
+
+            .sub-text {
+                font-size: 14px;
+            }
+
+            .btn-retry {
+                font-size: 15px;
+                padding: 14px 28px;
+                min-height: 50px;
+            }
+
+            .tips-item {
+                font-size: 13px;
+            }
+
+            .tips-item .tip-icon {
+                width: 28px;
+                height: 28px;
+                font-size: 12px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .offline-box {
+                padding: 20px 16px;
+            }
+
+            .offline-icon {
+                font-size: 48px;
+            }
+
+            h1 {
+                font-size: 18px;
+            }
+
+            .sub-text {
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="offline-box">
+        <!-- الأيقونة -->
+        <div class="offline-icon">
+            <i class="fas fa-wifi"></i>
+            <i class="fas fa-slash" style="position: relative; margin-right: -30px; font-size: 40px; color: #E74C3C;"></i>
+        </div>
+
+        <!-- العنوان -->
+        <h1>غير متصل بالإنترنت</h1>
+        <p class="sub-text">
+            يبدو أنك غير متصل بالشبكة. 
+            <br>
+            <span class="highlight">لا تقلق</span>، يمكنك المحاولة مرة أخرى.
+        </p>
+
+        <div class="divider"></div>
+
+        <!-- نصائح -->
+        <div class="tips">
+            <div class="tips-item">
+                <span class="tip-icon"><i class="fas fa-wifi"></i></span>
+                <span>تأكد من تفعيل الواي فاي أو بيانات الجوال</span>
+            </div>
+            <div class="tips-item">
+                <span class="tip-icon"><i class="fas fa-sync-alt"></i></span>
+                <span>حاول تحديث الصفحة بعد استعادة الاتصال</span>
+            </div>
+            <div class="tips-item">
+                <span class="tip-icon"><i class="fas fa-clock"></i></span>
+                <span>انتظر بضع ثوانٍ ثم حاول مرة أخرى</span>
+            </div>
+        </div>
+
+        <!-- زر إعادة المحاولة -->
+        <button class="btn-retry" onclick="location.reload()">
+            <i class="fas fa-sync-alt"></i>
+            إعادة المحاولة
+        </button>
+
+        <!-- التذييل -->
+        <div class="footer-brand">
+            <i class="fas fa-cut"></i>
+            صالوني · نظام الحجوزات الذكي
+            <span class="status-dot"></span>
+        </div>
+    </div>
+
+    <!-- ===== SCRIPT للكشف التلقائي عن عودة الاتصال ===== -->
+    <script>
+        // ==============================================================
+        //  الكشف التلقائي عن عودة الاتصال بالإنترنت
+        // ==============================================================
+
+        let retryAttempts = 0;
+        const MAX_RETRY_ATTEMPTS = 15;
+        let connectionInterval = null;
+
+        function checkConnection() {
+            if (navigator.onLine) {
+                console.log('✅ Connection restored! Redirecting...');
+                // محاولة التوجيه إلى الصفحة الرئيسية
+                const targetUrl = localStorage.getItem('offline_target_url') || '/';
+                window.location.href = targetUrl;
+                return true;
+            }
+            return false;
+        }
+
+        // التحقق الفوري
+        if (checkConnection()) {
+            // تم إعادة التوجيه
+        }
+
+        // الاستماع لعودة الاتصال
+        window.addEventListener('online', function() {
+            console.log('🔄 Online event detected!');
+            setTimeout(function() {
+                if (checkConnection()) {
+                    // تم إعادة التوجيه
+                }
+            }, 500);
+        });
+
+        // محاولة إعادة التحقق كل 3 ثواني
+        connectionInterval = setInterval(function() {
+            retryAttempts++;
+            if (retryAttempts > MAX_RETRY_ATTEMPTS) {
+                clearInterval(connectionInterval);
+                console.log('⏹️ Stopped retrying after', MAX_RETRY_ATTEMPTS, 'attempts');
+                return;
+            }
+            
+            if (checkConnection()) {
+                clearInterval(connectionInterval);
+            }
+        }, 3000);
+
+        // ==============================================================
+        //  عرض معلومات إضافية (اختياري)
+        // ==============================================================
+
+        console.log('📡 Offline page loaded');
+        console.log('🔄 Auto-retry every 3 seconds (max', MAX_RETRY_ATTEMPTS, 'attempts)');
+
+        // حفظ المسار الحالي كوجهة عند العودة
+        localStorage.setItem('offline_target_url', window.location.pathname || '/');
+    </script>
+
+</body>
+</html>

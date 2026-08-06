@@ -1,0 +1,3316 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" id="htmlRoot">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5" />
+    <meta name="theme-color" content="#0D0D0D" />
+    <title id="pageTitle">صالوني | حجز متقدم</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    
+    <!-- ===== SUPABASE ===== -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-client.js"></script>
+    
+    <style>
+        /* ===== RESET & ROOT ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --gold: #D4AF37;
+            --gold-light: #E8C84A;
+            --gold-dark: #B8960F;
+            --gold-glow: rgba(212, 175, 55, 0.3);
+            --gold-gradient: linear-gradient(135deg, #D4AF37, #B8960F);
+            --bg-primary: #0A0A0A;
+            --bg-secondary: #0F0F0F;
+            --bg-surface: #161616;
+            --bg-card: rgba(22, 22, 22, 0.95);
+            --bg-glass: rgba(20, 20, 20, 0.85);
+            --bg-input: rgba(255, 255, 255, 0.08);
+            --text-primary: #FFFFFF;
+            --text-secondary: #E8E0D0;
+            --text-muted: #B0A898;
+            --border-subtle: rgba(212, 175, 55, 0.10);
+            --border-gold: rgba(212, 175, 55, 0.25);
+            --shadow-card: 0 12px 48px rgba(0, 0, 0, 0.8);
+            --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.6);
+            --font: 'Tajawal', system-ui, -apple-system, sans-serif;
+        }
+
+        [data-theme="light"] {
+            --bg-primary: #F8F4ED;
+            --bg-secondary: #F0EBE0;
+            --bg-surface: #EAE3D6;
+            --bg-card: rgba(240, 235, 225, 0.95);
+            --bg-glass: rgba(245, 240, 232, 0.90);
+            --bg-input: rgba(0, 0, 0, 0.06);
+            --text-primary: #1A1A1A;
+            --text-secondary: #3D3A35;
+            --text-muted: #7A756E;
+            --border-subtle: rgba(0, 0, 0, 0.08);
+            --border-gold: rgba(212, 175, 55, 0.35);
+            --shadow-card: 0 12px 48px rgba(0, 0, 0, 0.12);
+            --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.06);
+        }
+
+        [data-theme="light"] .app-header {
+            background: rgba(248, 244, 237, 0.95);
+            border-bottom-color: rgba(0, 0, 0, 0.06);
+        }
+        [data-theme="light"] .bottom-nav {
+            background: rgba(248, 244, 237, 0.97);
+            border-top-color: rgba(0, 0, 0, 0.06);
+        }
+        [data-theme="light"] .glass-card {
+            background: var(--bg-card);
+            border-color: rgba(0, 0, 0, 0.06);
+        }
+        [data-theme="light"] .glass-card h3 {
+            color: #1A1A1A;
+        }
+        [data-theme="light"] .category-accordion {
+            background: rgba(0, 0, 0, 0.03);
+            border-color: rgba(0, 0, 0, 0.06);
+        }
+        [data-theme="light"] .category-body .service-card {
+            background: rgba(0, 0, 0, 0.03);
+            border-color: rgba(0, 0, 0, 0.08);
+        }
+        [data-theme="light"] .category-body .service-card .service-name {
+            color: #1A1A1A;
+        }
+        [data-theme="light"] .category-body .service-card .service-price {
+            color: var(--gold-dark);
+        }
+        [data-theme="light"] .category-body .service-card.selected {
+            background: rgba(212, 175, 55, 0.15);
+            border-color: var(--gold);
+        }
+        [data-theme="light"] .staff-card {
+            background: rgba(0, 0, 0, 0.03);
+            border-color: rgba(0, 0, 0, 0.08);
+        }
+        [data-theme="light"] .staff-card .staff-name {
+            color: #1A1A1A;
+        }
+        [data-theme="light"] .staff-card .staff-stats {
+            color: #4A4A4A;
+        }
+        [data-theme="light"] .staff-card.selected {
+            background: rgba(212, 175, 55, 0.12);
+            border-color: var(--gold);
+        }
+        [data-theme="light"] .selected-service-tag {
+            background: rgba(212, 175, 55, 0.15);
+            border-color: rgba(212, 175, 55, 0.3);
+            color: #1A1A1A;
+        }
+        [data-theme="light"] .selected-service-tag .remove-btn {
+            color: #7A756E;
+        }
+        [data-theme="light"] .selected-service-tag .remove-btn:hover {
+            color: #C0392B;
+        }
+        [data-theme="light"] .step-label {
+            color: #7A756E;
+        }
+        [data-theme="light"] .step-label.active {
+            color: var(--gold-dark);
+        }
+        [data-theme="light"] .category-header {
+            color: #3D3A35;
+        }
+        [data-theme="light"] .category-header.open {
+            color: var(--gold-dark);
+        }
+        [data-theme="light"] .text-secondary {
+            color: #3D3A35;
+        }
+        [data-theme="light"] .text-muted {
+            color: #7A756E;
+        }
+        [data-theme="light"] .total-price {
+            color: var(--gold-dark);
+        }
+        [data-theme="light"] .text-gold {
+            color: var(--gold-dark);
+        }
+        [data-theme="light"] .confirm-summary {
+            background: rgba(0, 0, 0, 0.04);
+            border-color: rgba(0, 0, 0, 0.06);
+        }
+        [data-theme="light"] .confirm-summary .summary-row .value {
+            color: #1A1A1A;
+        }
+        [data-theme="light"] .toast-success {
+            background: rgba(46, 204, 113, 0.95);
+            color: #0D0D0D;
+        }
+        [data-theme="light"] .toast-error {
+            background: rgba(231, 76, 60, 0.95);
+            color: #fff;
+        }
+        [data-theme="light"] .toast-info {
+            background: rgba(52, 152, 219, 0.95);
+            color: #fff;
+        }
+        [data-theme="light"] .now-serving-card {
+            background: var(--bg-card);
+            border-color: rgba(0, 0, 0, 0.06);
+        }
+        [data-theme="light"] .time-info-bar {
+            background: rgba(0, 0, 0, 0.04);
+            border-color: rgba(0, 0, 0, 0.06);
+        }
+        [data-theme="light"] .badge-gold {
+            background: rgba(212, 175, 55, 0.12);
+            border-color: rgba(212, 175, 55, 0.3);
+            color: var(--gold-dark);
+        }
+        [data-theme="light"] .queue-item {
+            background: rgba(0, 0, 0, 0.04);
+            border-color: rgba(0, 0, 0, 0.06);
+        }
+        [data-theme="light"] .queue-item.first {
+            background: rgba(212, 175, 55, 0.08);
+            border-color: var(--gold);
+        }
+        [data-theme="light"] .queue-item .q-number {
+            color: #1A1A1A;
+        }
+        [data-theme="light"] .queue-item.first .q-number {
+            color: var(--gold-dark);
+        }
+        [data-theme="light"] .stat-card {
+            background: var(--bg-card);
+            border-color: rgba(0, 0, 0, 0.06);
+        }
+        [data-theme="light"] .stat-number {
+            color: #1A1A1A;
+        }
+
+        [dir="ltr"] {
+            text-align: left;
+        }
+        [dir="ltr"] .category-header {
+            text-align: left;
+        }
+        [dir="ltr"] .step-label {
+            text-align: center;
+        }
+        [dir="ltr"] .bottom-nav .nav-item {
+            direction: ltr;
+        }
+        [dir="ltr"] .app-header .logo {
+            direction: ltr;
+        }
+        [dir="ltr"] .service-card .service-check {
+            right: auto;
+            left: 6px;
+        }
+        [dir="ltr"] .staff-card .staff-check {
+            right: auto;
+            left: 6px;
+        }
+
+        [lang="ur"] {
+            font-family: 'Noto Nastaliq Urdu', 'Tajawal', system-ui, sans-serif;
+        }
+
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--gold);
+            border-radius: 10px;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            min-height: 100dvh;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            transition: background 0.4s ease, color 0.4s ease;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(255, 215, 0, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(255, 215, 0, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(255, 215, 0, 0.03) 0%, transparent 30%);
+        }
+
+        .container {
+            max-width: 560px;
+            margin: 0 auto;
+            padding: 0 16px 100px;
+        }
+
+        .flex {
+            display: flex;
+        }
+        .flex-col {
+            flex-direction: column;
+        }
+        .items-center {
+            align-items: center;
+        }
+        .justify-between {
+            justify-content: space-between;
+        }
+        .gap-2 {
+            gap: 8px;
+        }
+        .gap-3 {
+            gap: 12px;
+        }
+        .gap-4 {
+            gap: 16px;
+        }
+        .text-center {
+            text-align: center;
+        }
+        .text-gold {
+            color: var(--gold);
+        }
+        .text-secondary {
+            color: var(--text-secondary);
+        }
+        .text-muted {
+            color: var(--text-muted);
+        }
+        .text-sm {
+            font-size: 14px;
+        }
+        .text-xs {
+            font-size: 12px;
+        }
+        .font-bold {
+            font-weight: 700;
+        }
+        .font-extrabold {
+            font-weight: 800;
+        }
+        .mt-1 {
+            margin-top: 4px;
+        }
+        .mt-2 {
+            margin-top: 8px;
+        }
+        .mt-3 {
+            margin-top: 16px;
+        }
+        .mt-4 {
+            margin-top: 24px;
+        }
+        .mb-2 {
+            margin-bottom: 8px;
+        }
+        .mb-3 {
+            margin-bottom: 16px;
+        }
+        .mb-4 {
+            margin-bottom: 24px;
+        }
+        .w-full {
+            width: 100%;
+        }
+        .hidden {
+            display: none !important;
+        }
+
+        /* ===== GLASS CARD ===== */
+        .glass-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-subtle);
+            border-radius: 30px;
+            padding: 24px;
+            transition: all 0.4s ease;
+            box-shadow: var(--shadow-card);
+        }
+
+        .glass-card:hover {
+            border-color: rgba(255, 215, 0, 0.25);
+            box-shadow: 0 25px 45px -10px #000, 0 0 30px rgba(255, 215, 0, 0.04);
+            transform: scale(1.004);
+        }
+
+        .glass-card h3 {
+            color: var(--text-primary);
+            font-weight: 700;
+            font-size: 20px;
+            transition: color 0.3s ease;
+        }
+
+        /* ===== BUTTONS ===== */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 16px 36px;
+            border: none;
+            border-radius: 60px;
+            font-family: var(--font);
+            font-size: 17px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+            min-height: 56px;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .btn:active {
+            transform: scale(0.96);
+        }
+        .btn-primary {
+            background: var(--gold-gradient);
+            color: #0D0D0D;
+            box-shadow: 0 4px 24px var(--gold-glow);
+        }
+        .btn-primary:hover {
+            box-shadow: 0 6px 36px rgba(212, 175, 55, 0.35);
+            transform: translateY(-1px);
+        }
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--gold);
+            color: var(--gold);
+        }
+        .btn-outline:hover {
+            background: rgba(212, 175, 55, 0.08);
+        }
+        .btn-ghost {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-secondary);
+            border: 1px solid transparent;
+        }
+        .btn-ghost:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-primary);
+        }
+        .btn-sm {
+            padding: 10px 20px;
+            font-size: 14px;
+            min-height: 44px;
+        }
+        .btn-block {
+            width: 100%;
+            justify-content: center;
+        }
+
+        /* ===== LANGUAGE TOGGLE ===== */
+        .lang-toggle {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px 6px 10px;
+            border: 2px solid var(--border-gold);
+            border-radius: 60px;
+            background: var(--bg-glass);
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: var(--font);
+            font-size: 14px;
+            font-weight: 600;
+            -webkit-tap-highlight-color: transparent;
+            min-height: 38px;
+            backdrop-filter: blur(8px);
+        }
+        .lang-toggle:hover {
+            border-color: var(--gold);
+            background: rgba(212, 175, 55, 0.08);
+        }
+        .lang-toggle:active {
+            transform: scale(0.95);
+        }
+        .lang-toggle .flag-icon {
+            font-size: 20px;
+            line-height: 1;
+        }
+        .lang-toggle .lang-label {
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .lang-toggle .lang-arrow {
+            font-size: 11px;
+            color: var(--text-muted);
+            transition: transform 0.3s ease;
+        }
+        .lang-toggle.open .lang-arrow {
+            transform: rotate(180deg);
+        }
+
+        .lang-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            right: 0;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 8px;
+            box-shadow: var(--shadow-card);
+            display: none;
+            z-index: 100;
+            min-width: 160px;
+            backdrop-filter: blur(20px);
+        }
+        .lang-dropdown.open {
+            display: block;
+        }
+        .lang-dropdown .lang-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: var(--font);
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: right;
+        }
+        .lang-dropdown .lang-option:hover {
+            background: rgba(212, 175, 55, 0.08);
+            color: var(--text-primary);
+        }
+        .lang-dropdown .lang-option.active {
+            background: rgba(212, 175, 55, 0.12);
+            color: var(--gold);
+        }
+        .lang-dropdown .lang-option .flag-icon {
+            font-size: 22px;
+        }
+
+        .lang-toggle-wrapper {
+            position: relative;
+        }
+
+        /* ===== THEME TOGGLE ===== */
+        .theme-toggle {
+            position: relative;
+            width: 60px;
+            height: 32px;
+            border-radius: 32px;
+            border: 2px solid var(--border-gold);
+            background: var(--bg-surface);
+            cursor: pointer;
+            transition: all 0.4s ease;
+            padding: 0;
+            flex-shrink: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .theme-toggle .toggle-thumb {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--gold);
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            color: #0D0D0D;
+        }
+        .theme-toggle.light .toggle-thumb {
+            right: auto;
+            left: 2px;
+        }
+        .theme-toggle .toggle-icon {
+            font-size: 13px;
+            line-height: 1;
+        }
+        .theme-toggle:active .toggle-thumb {
+            transform: scale(0.9);
+        }
+
+        /* ===== HEADER ===== */
+        .app-header {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            padding: 14px 20px;
+            background: rgba(10, 10, 10, 0.92);
+            backdrop-filter: blur(20px) saturate(1.3);
+            -webkit-backdrop-filter: blur(20px) saturate(1.3);
+            border-bottom: 1px solid var(--border-subtle);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: background 0.4s ease, border-color 0.4s ease;
+        }
+        .app-header .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--gold);
+            letter-spacing: -0.5px;
+        }
+        .app-header .logo-icon {
+            font-size: 30px;
+            line-height: 1;
+        }
+        .app-header .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* ===== BOTTOM NAV ===== */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 16px 16px;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(24px) saturate(1.3);
+            -webkit-backdrop-filter: blur(24px) saturate(1.3);
+            border-top: 1px solid var(--border-subtle);
+            padding-bottom: max(16px, env(safe-area-inset-bottom));
+            transition: background 0.4s ease, border-color 0.4s ease;
+        }
+        .bottom-nav .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            padding: 8px 16px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-family: var(--font);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 12px;
+            min-width: 64px;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .bottom-nav .nav-item .nav-icon {
+            font-size: 26px;
+            line-height: 1;
+            transition: transform 0.3s ease;
+        }
+        .bottom-nav .nav-item.active {
+            color: var(--gold);
+        }
+        .bottom-nav .nav-item.active .nav-icon {
+            transform: scale(1.1);
+        }
+        .bottom-nav .nav-item:active {
+            transform: scale(0.92);
+        }
+
+        /* ===== PAGES ===== */
+        .page {
+            display: none;
+            animation: pageFadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .page.active {
+            display: block;
+        }
+        @keyframes pageFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ===== SPLASH ===== */
+        .splash {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-primary);
+            animation: splashFadeOut 0.8s 1.6s forwards;
+        }
+        .splash .splash-icon {
+            font-size: 80px;
+            animation: splashPulse 1.2s ease-in-out infinite;
+        }
+        .splash .splash-title {
+            color: var(--gold);
+            font-size: 36px;
+            font-weight: 900;
+            margin-top: 12px;
+            letter-spacing: -1px;
+        }
+        .splash .splash-sub {
+            color: var(--text-muted);
+            font-size: 16px;
+            margin-top: 4px;
+        }
+        @keyframes splashPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+        }
+        @keyframes splashFadeOut {
+            to {
+                opacity: 0;
+                visibility: hidden;
+                pointer-events: none;
+            }
+        }
+
+        /* ===== STEP INDICATOR ===== */
+        .step-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin: 20px 0 16px;
+            padding: 0 20px;
+        }
+        .step-dot {
+            flex: 1;
+            height: 5px;
+            border-radius: 4px;
+            background: var(--border-subtle);
+            transition: all 0.4s ease;
+            max-width: 60px;
+        }
+        .step-dot.active {
+            background: var(--gold);
+            box-shadow: 0 0 20px var(--gold-glow);
+        }
+        .step-dot.done {
+            background: var(--gold-dark);
+        }
+        .step-label {
+            font-size: 13px;
+            color: var(--text-muted);
+            text-align: center;
+            margin-top: 4px;
+            transition: color 0.3s ease;
+            font-weight: 600;
+        }
+        .step-label.active {
+            color: var(--gold);
+            font-weight: 700;
+        }
+
+        /* ===== TIME INFO BAR ===== */
+        .time-info-bar {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            padding: 10px 16px;
+            background: rgba(212, 175, 55, 0.06);
+            border-radius: 16px;
+            border: 1px solid var(--border-subtle);
+            margin-bottom: 16px;
+            font-size: 13px;
+            color: var(--text-muted);
+            flex-wrap: wrap;
+            backdrop-filter: blur(4px);
+        }
+        .time-info-bar .time-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .time-info-bar .time-item .time-value {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        /* ===== CATEGORY ACCORDION ===== */
+        .category-accordion {
+            border: 1px solid var(--border-subtle);
+            border-radius: 14px;
+            margin-bottom: 10px;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.02);
+            transition: all 0.3s ease;
+        }
+        .category-accordion:last-child {
+            margin-bottom: 0;
+        }
+        .category-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            font-weight: 700;
+            font-size: 18px;
+            color: var(--text-secondary);
+            border: none;
+            background: transparent;
+            width: 100%;
+            font-family: var(--font);
+            text-align: right;
+        }
+        .category-header:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+        .category-header .arrow {
+            transition: transform 0.4s ease;
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+        .category-header.open .arrow {
+            transform: rotate(180deg);
+        }
+        .category-header.open {
+            color: var(--gold);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        .category-body {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 0 16px;
+        }
+        .category-body.open {
+            max-height: 600px;
+            padding: 14px 16px 18px;
+        }
+        .category-body .service-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .category-body .service-grid .service-card {
+            padding: 16px 10px;
+            border: 2px solid var(--border-subtle);
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.02);
+            text-align: center;
+            -webkit-tap-highlight-color: transparent;
+            position: relative;
+        }
+        .category-body .service-grid .service-card:active {
+            transform: scale(0.96);
+        }
+        .category-body .service-grid .service-card.selected {
+            border-color: var(--gold);
+            background: rgba(212, 175, 55, 0.08);
+            box-shadow: 0 0 30px var(--gold-glow);
+        }
+        .category-body .service-grid .service-card .service-name {
+            font-weight: 700;
+            font-size: 16px;
+            line-height: 1.4;
+            color: var(--text-primary);
+            transition: color 0.3s ease;
+        }
+        .category-body .service-grid .service-card .service-price {
+            color: var(--gold);
+            font-weight: 700;
+            font-size: 15px;
+            margin-top: 4px;
+        }
+        .category-body .service-grid .service-card .service-check {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--gold);
+            color: #0D0D0D;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        [dir="ltr"] .category-body .service-grid .service-card .service-check {
+            right: auto;
+            left: 6px;
+        }
+        .category-body .service-grid .service-card.selected .service-check {
+            display: flex;
+        }
+
+        .selected-services-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 12px 0;
+        }
+        .selected-service-tag {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background: rgba(212, 175, 55, 0.12);
+            border: 1px solid var(--border-gold);
+            border-radius: 40px;
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+        .selected-service-tag .remove-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 15px;
+            padding: 0 4px;
+            transition: color 0.2s ease;
+        }
+        .selected-service-tag .remove-btn:hover {
+            color: #E74C3C;
+        }
+
+        .total-price {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--gold);
+        }
+
+        /* ===== STAFF CARDS ===== */
+        .staff-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin: 12px 0;
+        }
+        .staff-card {
+            padding: 18px 14px;
+            border: 2px solid var(--border-subtle);
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.02);
+            text-align: center;
+            -webkit-tap-highlight-color: transparent;
+            position: relative;
+        }
+        .staff-card:active {
+            transform: scale(0.96);
+        }
+        .staff-card.selected {
+            border-color: var(--gold);
+            background: rgba(212, 175, 55, 0.08);
+            box-shadow: 0 0 30px var(--gold-glow);
+        }
+        .staff-card .staff-name {
+            font-weight: 700;
+            font-size: 18px;
+            color: var(--text-primary);
+            transition: color 0.3s ease;
+        }
+        .staff-card .staff-stats {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-top: 6px;
+        }
+        .staff-card .staff-stats span {
+            display: inline-block;
+            margin: 0 6px;
+        }
+        .staff-card .staff-check {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--gold);
+            color: #0D0D0D;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        [dir="ltr"] .staff-card .staff-check {
+            right: auto;
+            left: 6px;
+        }
+        .staff-card.selected .staff-check {
+            display: flex;
+        }
+
+        .staff-card.any-barber {
+            border-style: dashed;
+            border-color: var(--border-gold);
+            background: rgba(212, 175, 55, 0.04);
+        }
+        .staff-card.any-barber.selected {
+            border-style: solid;
+            border-color: var(--gold);
+            background: rgba(212, 175, 55, 0.08);
+        }
+        .staff-card.any-barber .staff-stats {
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        /* ===== CONFIRM SUMMARY ===== */
+        .confirm-summary {
+            background: rgba(212, 175, 55, 0.06);
+            border-radius: 16px;
+            padding: 16px;
+            border: 1px solid var(--border-subtle);
+            margin: 12px 0;
+        }
+        .confirm-summary .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            font-size: 16px;
+        }
+        .confirm-summary .summary-row .label {
+            color: var(--text-muted);
+        }
+        .confirm-summary .summary-row .value {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+        .confirm-summary .summary-row .value.gold {
+            color: var(--gold);
+            font-weight: 700;
+        }
+
+        /* ===== NOW SERVING CARD ===== */
+        .now-serving-card {
+            padding: 28px 24px 32px;
+            text-align: center;
+            position: relative;
+            background: rgba(12, 10, 10, 0.6);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 215, 0, 0.15);
+            box-shadow: 0 20px 40px -10px #000, 0 0 30px rgba(255, 215, 0, 0.05);
+            border-radius: 30px;
+            transition: all 0.3s ease;
+        }
+        .now-serving-card:hover {
+            border-color: rgba(255, 215, 0, 0.3);
+            box-shadow: 0 25px 50px -10px #000, 0 0 40px rgba(255, 215, 0, 0.08);
+            transform: scale(1.003);
+        }
+
+        .badge-gold {
+            display: inline-block;
+            background: rgba(255, 215, 0, 0.08);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            padding: 8px 28px;
+            border-radius: 60px;
+            font-weight: 700;
+            font-size: 18px;
+            color: #f5d77b;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.05);
+            backdrop-filter: blur(4px);
+        }
+        .badge-gold i {
+            margin-left: 8px;
+        }
+
+        .number-wrapper {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 10px 0 14px;
+        }
+
+        .glow-ring {
+            position: absolute;
+            width: 220px;
+            height: 220px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.15) 0%, transparent 70%);
+            filter: blur(30px);
+            animation: pulseRing 2.4s infinite alternate;
+        }
+        @keyframes pulseRing {
+            0% { transform: scale(0.9); opacity: 0.6; }
+            100% { transform: scale(1.15); opacity: 1; }
+        }
+
+        .current-number {
+            font-size: 140px;
+            font-weight: 900;
+            color: #f5d77b;
+            text-shadow: 0 0 40px rgba(255, 215, 0, 0.25), 0 0 80px rgba(255, 215, 0, 0.08);
+            line-height: 1;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .current-number .hash {
+            font-size: 80px;
+            font-weight: 300;
+            color: #6a5f4a;
+            text-shadow: none;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            background: rgba(0,0,0,0.3);
+            padding: 10px 28px;
+            border-radius: 60px;
+            border: 1px solid rgba(255, 215, 0, 0.04);
+            width: fit-content;
+            margin: 6px auto 0;
+        }
+        .dot-pulse {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #33cc66;
+            box-shadow: 0 0 25px #33cc66;
+            animation: dotPulse 1.6s infinite;
+        }
+        @keyframes dotPulse {
+            0%, 100% { opacity: 0.4; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+        .status-badge span {
+            font-weight: 700;
+            color: #b3d9b3;
+            font-size: 20px;
+        }
+
+        /* ===== QUEUE CARD ===== */
+        .queue-card {
+            padding: 24px 22px 28px;
+            background: rgba(12, 10, 10, 0.5);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 215, 0, 0.08);
+            border-radius: 30px;
+        }
+        .queue-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+        }
+        .queue-title {
+            font-size: 24px;
+            font-weight: 800;
+            color: #f5e7c8;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .queue-title i {
+            color: #f5c542;
+            font-size: 26px;
+        }
+        .queue-count {
+            background: rgba(255, 215, 0, 0.08);
+            border: 1px solid rgba(255, 215, 0, 0.15);
+            padding: 6px 22px;
+            border-radius: 60px;
+            font-weight: 700;
+            color: #f5d77b;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .queue-scroll {
+            max-height: 280px;
+            overflow-y: auto;
+            padding-left: 6px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px 8px;
+            align-items: flex-start;
+            scrollbar-width: thin;
+            scrollbar-color: #b8860b #1f1b1b;
+        }
+        .queue-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+        .queue-scroll::-webkit-scrollbar-track {
+            background: #1f1b1b;
+            border-radius: 20px;
+        }
+        .queue-scroll::-webkit-scrollbar-thumb {
+            background: #b8860b;
+            border-radius: 20px;
+            box-shadow: 0 0 12px rgba(255, 215, 0, 0.2);
+        }
+
+        .queue-item {
+            background: rgba(0,0,0,0.5);
+            border-radius: 16px;
+            padding: 12px 12px 8px;
+            min-width: 70px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            transition: all 0.2s;
+            flex: 0 0 auto;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        .queue-item.first {
+            border: 2px solid #f5c542;
+            background: rgba(255, 215, 0, 0.06);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.08);
+        }
+        .queue-item .q-number {
+            font-size: 28px;
+            font-weight: 800;
+            color: #f0e6d0;
+            line-height: 1.2;
+        }
+        .queue-item.first .q-number {
+            color: #f5d77b;
+            text-shadow: 0 0 12px rgba(255, 215, 0, 0.2);
+        }
+        .queue-item .q-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: #7a6f5a;
+            margin-top: 4px;
+        }
+        .queue-item.first .q-label {
+            color: #f5c542;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+        .queue-item.first .q-label i {
+            font-size: 12px;
+        }
+
+        /* ===== STATS ROW ===== */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+        .stat-card {
+            padding: 20px 18px;
+            background: rgba(12, 10, 10, 0.5);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 215, 0, 0.05);
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: all 0.3s ease;
+        }
+        .stat-card:hover {
+            border-color: rgba(255, 215, 0, 0.15);
+            transform: scale(1.02);
+        }
+        .stat-icon {
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            color: #0a0808;
+            flex-shrink: 0;
+        }
+        .stat-icon.green {
+            background: radial-gradient(circle at 30% 30%, #b3ffb3, #2d7a2d);
+            box-shadow: 0 0 30px rgba(0,255,100,0.08);
+        }
+        .stat-icon.blue {
+            background: radial-gradient(circle at 30% 30%, #8fcbff, #1f5b9e);
+            box-shadow: 0 0 30px rgba(0,150,255,0.08);
+        }
+        .stat-icon.purple {
+            background: radial-gradient(circle at 30% 30%, #d9b3ff, #7a3bb5);
+            box-shadow: 0 0 30px rgba(180,80,255,0.08);
+        }
+        .stat-info .stat-label {
+            font-size: 16px;
+            font-weight: 500;
+            color: #b8aa8a;
+        }
+        .stat-info .stat-number {
+            font-size: 38px;
+            font-weight: 900;
+            color: #f5e7c8;
+            line-height: 1.1;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.03);
+        }
+
+        .queue-number-display {
+            font-size: 80px;
+            font-weight: 900;
+            color: var(--gold);
+            text-shadow: 0 0 60px var(--gold-glow);
+            line-height: 1;
+            letter-spacing: -2px;
+        }
+
+        .queue-stat {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 18px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 14px;
+            border: 1px solid var(--border-subtle);
+        }
+        .queue-stat .stat-value {
+            font-size: 30px;
+            font-weight: 800;
+            color: var(--text-primary);
+            transition: color 0.3s ease;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 14px;
+            border-radius: 40px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+        .badge-pending_approval {
+            background: rgba(243, 156, 18, 0.2);
+            color: #F39C12;
+        }
+        .badge-pending {
+            background: rgba(212, 175, 55, 0.2);
+            color: var(--gold);
+        }
+        .badge-in_progress {
+            background: rgba(52, 152, 219, 0.2);
+            color: #3498DB;
+        }
+        .badge-completed {
+            background: rgba(46, 204, 113, 0.2);
+            color: #2ECC71;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        .empty-state .empty-icon {
+            font-size: 56px;
+            margin-bottom: 12px;
+        }
+        .empty-state .empty-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        .empty-state .empty-desc {
+            color: var(--text-secondary);
+            font-size: 15px;
+            margin-top: 4px;
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            pointer-events: none;
+            max-width: 90%;
+            width: 400px;
+        }
+        .toast {
+            padding: 16px 28px;
+            border-radius: 60px;
+            font-weight: 700;
+            font-size: 15px;
+            animation: toastIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+                toastOut 0.3s ease 2.8s forwards;
+            pointer-events: auto;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            text-align: center;
+        }
+        .toast-success {
+            background: rgba(46, 204, 113, 0.95);
+            color: #0D0D0D;
+        }
+        .toast-error {
+            background: rgba(231, 76, 60, 0.95);
+            color: #fff;
+        }
+        .toast-info {
+            background: rgba(52, 152, 219, 0.95);
+            color: #fff;
+        }
+        @keyframes toastIn {
+            from {
+                transform: translateY(-40px) scale(0.9);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+        }
+        @keyframes toastOut {
+            to {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 20px;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal-content {
+            background: var(--bg-surface);
+            border-radius: 24px;
+            padding: 28px;
+            max-width: 440px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+            border: 1px solid var(--border-subtle);
+            box-shadow: var(--shadow-card);
+            animation: modalSlide 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            text-align: center;
+            transition: background 0.4s ease;
+        }
+        @keyframes modalSlide {
+            from {
+                transform: translateY(30px) scale(0.95);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+        }
+        .modal-content .modal-title {
+            font-size: 22px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+        .modal-content p {
+            color: var(--text-secondary);
+            font-size: 16px;
+        }
+
+        .booking-step {
+            display: none;
+            animation: pageFadeIn 0.3s ease;
+        }
+        .booking-step.active {
+            display: block;
+        }
+
+        .step-nav {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        .step-nav .btn {
+            flex: 1;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 12px 90px;
+            }
+            .category-body .service-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+            .category-body .service-grid .service-card {
+                padding: 14px 8px;
+            }
+            .category-body .service-grid .service-card .service-name {
+                font-size: 14px;
+            }
+            .category-body .service-grid .service-card .service-price {
+                font-size: 13px;
+            }
+            .staff-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+            .staff-card {
+                padding: 14px 10px;
+            }
+            .staff-card .staff-name {
+                font-size: 16px;
+            }
+            .staff-card .staff-stats {
+                font-size: 13px;
+            }
+            .glass-card {
+                padding: 16px;
+            }
+            .modal-content {
+                padding: 20px;
+            }
+            .btn {
+                padding: 14px 24px;
+                font-size: 15px;
+                min-height: 50px;
+            }
+            .category-header {
+                padding: 14px 16px;
+                font-size: 16px;
+            }
+            .theme-toggle {
+                width: 50px;
+                height: 28px;
+            }
+            .theme-toggle .toggle-thumb {
+                width: 20px;
+                height: 20px;
+                font-size: 11px;
+            }
+            .step-label {
+                font-size: 11px;
+            }
+            .lang-toggle {
+                font-size: 12px;
+                padding: 4px 10px 4px 8px;
+                min-height: 32px;
+            }
+            .lang-toggle .flag-icon {
+                font-size: 16px;
+            }
+            .lang-toggle .lang-label {
+                font-size: 12px;
+            }
+            .app-header .logo {
+                font-size: 18px;
+            }
+            .app-header .logo-icon {
+                font-size: 24px;
+            }
+            .glass-card h3 {
+                font-size: 17px;
+            }
+            .total-price {
+                font-size: 20px;
+            }
+            .selected-service-tag {
+                font-size: 13px;
+                padding: 6px 10px;
+            }
+            .confirm-summary .summary-row {
+                font-size: 14px;
+            }
+            .time-info-bar {
+                font-size: 11px;
+                gap: 10px;
+                padding: 8px 12px;
+            }
+            .current-number {
+                font-size: 100px;
+            }
+            .glow-ring {
+                width: 170px;
+                height: 170px;
+            }
+            .current-number .hash {
+                font-size: 60px;
+            }
+            .stats-row {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+            .stat-card {
+                padding: 14px 12px;
+                gap: 12px;
+            }
+            .stat-icon {
+                width: 44px;
+                height: 44px;
+                font-size: 20px;
+            }
+            .stat-info .stat-number {
+                font-size: 28px;
+            }
+            .stat-info .stat-label {
+                font-size: 13px;
+            }
+            .queue-scroll {
+                max-height: 220px;
+                gap: 8px;
+            }
+            .queue-item {
+                padding: 8px 8px 6px;
+                min-width: 56px;
+            }
+            .queue-item .q-number {
+                font-size: 22px;
+            }
+            .queue-item .q-label {
+                font-size: 11px;
+            }
+            .badge-gold {
+                font-size: 15px;
+                padding: 6px 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 0 10px 80px;
+            }
+            .category-body .service-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 6px;
+            }
+            .category-body .service-grid .service-card .service-name {
+                font-size: 13px;
+            }
+            .staff-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+            .staff-card .staff-name {
+                font-size: 14px;
+            }
+            .staff-card .staff-stats {
+                font-size: 12px;
+            }
+            .current-number {
+                font-size: 70px;
+            }
+            .glow-ring {
+                width: 130px;
+                height: 130px;
+            }
+            .current-number .hash {
+                font-size: 40px;
+            }
+            .stats-row {
+                grid-template-columns: 1fr 1fr;
+                gap: 6px;
+            }
+            .stat-card {
+                padding: 10px 10px;
+                gap: 8px;
+                border-radius: 20px;
+            }
+            .stat-icon {
+                width: 36px;
+                height: 36px;
+                font-size: 16px;
+            }
+            .stat-info .stat-number {
+                font-size: 22px;
+            }
+            .stat-info .stat-label {
+                font-size: 11px;
+            }
+            .queue-item {
+                min-width: 48px;
+                padding: 6px 6px 4px;
+            }
+            .queue-item .q-number {
+                font-size: 18px;
+            }
+            .queue-item .q-label {
+                font-size: 10px;
+            }
+            .queue-scroll {
+                max-height: 180px;
+                gap: 6px;
+            }
+            .badge-gold {
+                font-size: 13px;
+                padding: 4px 14px;
+            }
+            .status-badge {
+                padding: 6px 16px;
+            }
+            .status-badge span {
+                font-size: 15px;
+            }
+            .dot-pulse {
+                width: 12px;
+                height: 12px;
+            }
+            .app-header {
+                padding: 10px 12px;
+            }
+            .app-header .logo {
+                font-size: 16px;
+            }
+            .app-header .logo-icon {
+                font-size: 20px;
+            }
+            .time-info-bar {
+                font-size: 10px;
+                gap: 6px;
+                padding: 6px 10px;
+                border-radius: 12px;
+            }
+            .glass-card {
+                padding: 12px;
+                border-radius: 20px;
+            }
+            .queue-card {
+                padding: 16px 14px 20px;
+                border-radius: 20px;
+            }
+            .now-serving-card {
+                padding: 16px 12px 20px;
+                border-radius: 20px;
+            }
+            .confirm-summary {
+                padding: 12px;
+            }
+            .confirm-summary .summary-row {
+                font-size: 13px;
+                padding: 4px 0;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .category-body .service-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 4px;
+            }
+            .category-body .service-grid .service-card .service-name {
+                font-size: 12px;
+            }
+            .staff-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 6px;
+            }
+            .staff-card .staff-name {
+                font-size: 13px;
+            }
+            .staff-card .staff-stats {
+                font-size: 11px;
+            }
+            .current-number {
+                font-size: 56px;
+            }
+            .glow-ring {
+                width: 100px;
+                height: 100px;
+            }
+            .current-number .hash {
+                font-size: 32px;
+            }
+            .stats-row {
+                grid-template-columns: 1fr 1fr;
+                gap: 4px;
+            }
+            .stat-card {
+                padding: 8px 6px;
+                gap: 6px;
+            }
+            .stat-icon {
+                width: 30px;
+                height: 30px;
+                font-size: 14px;
+            }
+            .stat-info .stat-number {
+                font-size: 18px;
+            }
+            .stat-info .stat-label {
+                font-size: 10px;
+            }
+            .queue-item {
+                min-width: 40px;
+                padding: 4px 4px 3px;
+                border-radius: 10px;
+            }
+            .queue-item .q-number {
+                font-size: 15px;
+            }
+            .queue-item .q-label {
+                font-size: 8px;
+            }
+            .queue-scroll {
+                max-height: 150px;
+                gap: 4px;
+            }
+        }
+
+        @media (orientation: landscape) and (max-height: 500px) {
+            .app-header {
+                padding: 8px 16px;
+            }
+            .app-header .logo {
+                font-size: 16px;
+            }
+            .app-header .logo-icon {
+                font-size: 20px;
+            }
+            .container {
+                padding: 0 12px 80px;
+            }
+            .now-serving-card {
+                padding: 16px 16px 20px;
+            }
+            .current-number {
+                font-size: 80px;
+            }
+            .glow-ring {
+                width: 140px;
+                height: 140px;
+            }
+            .current-number .hash {
+                font-size: 45px;
+            }
+            .queue-scroll {
+                max-height: 160px;
+            }
+            .queue-item {
+                padding: 4px 6px 3px;
+                min-width: 44px;
+            }
+            .queue-item .q-number {
+                font-size: 18px;
+            }
+            .stats-row {
+                gap: 8px;
+            }
+            .stat-card {
+                padding: 10px 12px;
+            }
+            .stat-info .stat-number {
+                font-size: 24px;
+            }
+            .glass-card {
+                padding: 12px 14px;
+            }
+            .category-body .service-grid {
+                gap: 6px;
+            }
+            .category-body .service-grid .service-card {
+                padding: 10px 6px;
+            }
+            .badge-gold {
+                font-size: 13px;
+                padding: 4px 16px;
+                margin-bottom: 10px;
+            }
+            .status-badge {
+                padding: 4px 12px;
+            }
+            .status-badge span {
+                font-size: 14px;
+            }
+            .dot-pulse {
+                width: 10px;
+                height: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== SPLASH ===== -->
+    <div class="splash" id="splashScreen">
+        <div class="splash-icon">✂️</div>
+        <div class="splash-title" id="splashTitle">صالوني</div>
+        <div class="splash-sub" id="splashSub">نظام الحجوزات الذكي</div>
+    </div>
+
+    <!-- ===== TOAST ===== -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- ===== APP ===== -->
+    <div id="appContainer" style="display:none;">
+
+        <!-- ===== HEADER ===== -->
+        <header class="app-header">
+            <div class="logo">
+                <span class="logo-icon">✂️</span>
+                <span id="appTitle">صالوني</span>
+            </div>
+            <div class="header-actions">
+                <div class="lang-toggle-wrapper">
+                    <button class="lang-toggle" id="langToggle" onclick="toggleLangDropdown()">
+                        <span class="flag-icon" id="currentFlag">🇸🇦</span>
+                        <span class="lang-label" id="currentLangLabel">العربية</span>
+                        <span class="lang-arrow">▼</span>
+                    </button>
+                    <div class="lang-dropdown" id="langDropdown">
+                        <button class="lang-option active" data-lang="ar" onclick="setLanguage('ar')">
+                            <span class="flag-icon">🇸🇦</span>
+                            <span>العربية</span>
+                        </button>
+                        <button class="lang-option" data-lang="en" onclick="setLanguage('en')">
+                            <span class="flag-icon">🇬🇧</span>
+                            <span>English</span>
+                        </button>
+                        <button class="lang-option" data-lang="ur" onclick="setLanguage('ur')">
+                            <span class="flag-icon">🇵🇰</span>
+                            <span>اردو</span>
+                        </button>
+                    </div>
+                </div>
+                <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">
+                    <span class="toggle-thumb">
+                        <span class="toggle-icon" id="themeIcon">🌙</span>
+                    </span>
+                </button>
+            </div>
+        </header>
+
+        <!-- ===== PAGE: BOOKING ===== -->
+        <div class="page active" id="page-booking">
+            <div class="container">
+
+                <!-- Time Info Bar -->
+                <div class="time-info-bar" id="timeInfoBar">
+                    <span class="time-item">🕐 أوقات العمل: <span class="time-value" id="workHoursDisplay">09:00 - 17:00</span></span>
+                    <span class="time-item">⏰ الوقت الحالي: <span class="time-value" id="currentTimeDisplay">--:--</span></span>
+                    <span class="time-item" id="statusTimeDisplay" style="display:none;">⚠️ خارج أوقات العمل</span>
+                </div>
+
+                <!-- Step Indicator -->
+                <div style="margin-bottom:16px;">
+                    <div class="step-indicator">
+                        <div class="step-dot active" data-step="1"></div>
+                        <div class="step-dot" data-step="2"></div>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;padding:0 10px;">
+                        <span class="step-label active" data-step="1" id="step1Label">الخدمات</span>
+                        <span class="step-label" data-step="2" id="step2Label">اختر الحلاق</span>
+                    </div>
+                </div>
+
+                <!-- Step 1: Services -->
+                <div class="booking-step active" id="stepServices">
+                    <div class="glass-card">
+                        <h3 id="servicesTitle" style="margin-bottom:6px;">اختر الخدمات المطلوبة</h3>
+                        <p id="servicesSub" class="text-muted" style="margin-bottom:16px;font-size:15px;">اختر خدمة أو أكثر</p>
+
+                        <div id="servicesContainer">
+                            <div style="text-align:center;padding:30px;color:var(--text-muted);">
+                                <span style="font-size:32px;">⏳</span><br>
+                                جاري تحميل الخدمات...
+                            </div>
+                        </div>
+
+                        <div style="margin-top:18px;padding-top:18px;border-top:1px solid var(--border-subtle);">
+                            <div class="flex justify-between items-center">
+                                <span id="totalLabel" style="font-weight:700;font-size:17px;">المجموع:</span>
+                                <span class="total-price" id="totalPrice">0 ريال</span>
+                            </div>
+                            <div class="selected-services-list" id="selectedServicesList"></div>
+                        </div>
+
+                        <button class="btn btn-primary btn-block mt-3" id="nextBtn1" onclick="goToStep(2)">
+                            التالي
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 2: Staff -->
+                <div class="booking-step" id="stepStaff">
+                    <div class="glass-card">
+                        <h3 id="staffTitle" style="margin-bottom:4px;">اختر الحلاق</h3>
+                        <p id="staffSub" class="text-muted" style="margin-bottom:14px;font-size:15px;">اختر الحلاق المفضل لديك أو اختر "أي حلاق"</p>
+
+                        <div class="staff-grid" id="staffGrid">
+                            <div style="text-align:center;padding:30px;color:var(--text-muted);grid-column:1/-1;">
+                                <span style="font-size:32px;">⏳</span><br>
+                                جاري تحميل الحلاقين...
+                            </div>
+                        </div>
+
+                        <div class="confirm-summary">
+                            <div class="summary-row">
+                                <span class="label" id="confirmServicesFinalLabel">الخدمات:</span>
+                                <span class="value" id="finalServicesList">-</span>
+                            </div>
+                            <div class="summary-row">
+                                <span class="label" id="confirmTotalFinalLabel">المبلغ:</span>
+                                <span class="value gold" id="finalTotalPrice">0 ريال</span>
+                            </div>
+                            <div class="summary-row">
+                                <span class="label" id="confirmStaffFinalLabel">الحلاق:</span>
+                                <span class="value" id="finalStaffName">-</span>
+                            </div>
+                            <div class="summary-row">
+                                <span class="label" id="confirmDurationLabel">مدة الحجز:</span>
+                                <span class="value" id="finalDuration">30 دقيقة</span>
+                            </div>
+                        </div>
+
+                        <button class="btn btn-primary btn-block" id="confirmBtn" onclick="confirmBooking()">
+                            تأكيد الحجز
+                        </button>
+
+                        <button class="btn btn-outline btn-block mt-2" id="backBtn2" onclick="goToStep(1)">
+                            رجوع
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Waiting for Approval -->
+                <div class="hidden" id="waitingApproval">
+                    <div class="glass-card text-center" style="padding:32px 20px;">
+                        <div style="font-size:56px;margin-bottom:8px;">⏳</div>
+                        <h3 id="waitingTitle" style="font-size:22px;">جاري انتظار الموافقة</h3>
+                        <p id="waitingSub" class="text-secondary mt-1" style="font-size:16px;">سيتم تأكيد حجزك من قبل المدير</p>
+                        <div style="margin-top:16px;padding:16px;background:rgba(212,175,55,0.06);border-radius:14px;border:1px solid var(--border-subtle);">
+                            <p id="tempNumberLabel" class="text-muted" style="font-size:14px;">رقم الطلب المؤقت</p>
+                            <span style="font-size:34px;font-weight:800;color:var(--gold);" id="tempQueueNumber">--</span>
+                        </div>
+                        <button class="btn btn-primary btn-block mt-3" id="viewQueueBtn" onclick="switchTab('queue')">
+                            عرض مكاني في الطابور
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Bottom Nav -->
+            <nav class="bottom-nav">
+                <button class="nav-item active" id="navBook" onclick="switchTab('booking')">
+                    <span class="nav-icon">📅</span>
+                    <span id="navBookLabel">حجز</span>
+                </button>
+                <button class="nav-item" id="navQueue" onclick="switchTab('queue')">
+                    <span class="nav-icon">🚶</span>
+                    <span id="navQueueLabel">مكاني</span>
+                </button>
+            </nav>
+        </div>
+
+        <!-- ===== PAGE: QUEUE ===== -->
+        <div class="page" id="page-queue">
+            <div class="container">
+                <h3 id="queuePageTitle" style="font-size:20px;font-weight:700;margin-bottom:16px;">مكاني في الطابور</h3>
+
+                <div id="queueStatusContainer">
+                    <div class="glass-card text-center" style="padding:32px 20px;">
+
+                        <div style="margin-bottom:12px;">
+                            <span class="badge" style="background:rgba(212,175,55,0.15);color:var(--gold);padding:4px 16px;border-radius:40px;font-size:14px;" id="queueStatusBadge">في الانتظار</span>
+                        </div>
+
+                        <p id="yourTurnLabel" class="text-secondary" style="font-size:16px;">رقم دورك</p>
+                        <div class="queue-number-display" id="myQueueNumber">--</div>
+
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px;">
+                            <div class="queue-stat">
+                                <div>
+                                    <div id="aheadLabel" class="text-muted" style="font-size:13px;">قبلك</div>
+                                    <div class="stat-value" id="aheadCount">0</div>
+                                </div>
+                            </div>
+                            <div class="queue-stat">
+                                <div>
+                                    <div id="waitLabel" class="text-muted" style="font-size:13px;">الوقت المتبقي</div>
+                                    <div class="stat-value" id="waitTime">0</div>
+                                    <div id="minutesLabel" class="text-muted" style="font-size:13px;">دقيقة</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="margin-top:16px;padding:16px;background:rgba(212,175,55,0.06);border-radius:14px;border:1px solid var(--border-subtle);">
+                            <p id="currentServingLabel" class="text-muted" style="font-size:13px;">الرقم الحالي</p>
+                            <span style="font-size:36px;font-weight:800;color:var(--gold);" id="currentServingNum">--</span>
+                        </div>
+
+                        <div style="margin-top:12px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;" id="aheadNumbers">
+                        </div>
+
+                        <button class="btn btn-outline btn-block mt-3" id="newBookingBtn" onclick="resetBooking()">
+                            حجز موعد آخر
+                        </button>
+                    </div>
+                </div>
+
+                <div class="empty-state hidden" id="noActiveBooking">
+                    <div class="empty-icon">📭</div>
+                    <div id="noBookingTitle" class="empty-title">ليس لديك حجز نشط</div>
+                    <div id="noBookingDesc" class="empty-desc">يمكنك حجز موعد جديد الآن</div>
+                    <button class="btn btn-primary mt-3" id="newBookingBtn2" onclick="switchTab('booking')">
+                        حجز موعد جديد
+                    </button>
+                </div>
+            </div>
+
+            <nav class="bottom-nav">
+                <button class="nav-item" id="navBook2" onclick="switchTab('booking')">
+                    <span class="nav-icon">📅</span>
+                    <span id="navBookLabel2">حجز</span>
+                </button>
+                <button class="nav-item active" id="navQueue2" onclick="switchTab('queue')">
+                    <span class="nav-icon">🚶</span>
+                    <span id="navQueueLabel2">مكاني</span>
+                </button>
+            </nav>
+        </div>
+
+    </div>
+
+    <!-- ===== MODAL ===== -->
+    <div class="modal-overlay" id="notificationModal">
+        <div class="modal-content">
+            <div style="font-size:48px;margin-bottom:4px;" id="notifIcon">🔔</div>
+            <div class="modal-title" id="notifTitle">تنبيه</div>
+            <p id="notifMsg" style="margin-bottom:16px;"></p>
+            <button class="btn btn-primary btn-block" id="notifBtn" onclick="closeNotification()">حسناً</button>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!--  CLIENT.JS - VERSION 4.0 (REAL-TIME + EXTENDED HOURS + ACCURATE TRANSLATION) -->
+    <!-- ============================================================ -->
+    <script>
+        // ==============================================================
+        //  CLIENT.JS - VERSION 4.0
+        //  - تحديث فوري عبر Supabase Realtime + BroadcastChannel
+        //  - ترجمة دقيقة للخدمات (name_ar, name_en, name_ur)
+        //  - دعم الدوام الممتد لليوم التالي (أي وقت من 1 إلى 24 ساعة)
+        //  - حساب دقيق لعدد الحجوزات القبلك في صفحة "مكاني"
+        // ==============================================================
+
+        // ===== STATE =====
+        let allServices = [];
+        let allStaff = [];
+        let selectedServices = [];
+        let selectedStaff = null;
+        let myAppointments = [];
+        let activeQueueAppointment = null;
+        let currentStep = 1;
+        let tempQueueNumber = null;
+        let openCategory = null;
+        let currentLanguage = 'ar';
+        let workSchedule = { startTime: '09:00', endTime: '17:00' };
+        let isGistConfigured = false;
+        let lastUpdateTimestamp = null;
+        let _updateLock = false;
+        let previousActiveAppointmentId = null;
+        let previousStatus = null;
+
+        const userId = localStorage.getItem('booking_user_id') || ('user_' + Date.now());
+        localStorage.setItem('booking_user_id', userId);
+        const BOOKING_DURATION = 30;
+
+        // ===== DOM REFS =====
+        const $ = id => document.getElementById(id);
+
+        // ===== TRANSLATIONS =====
+        const translations = {
+            ar: {
+                appTitle: 'صالوني', splashTitle: 'صالوني', splashSub: 'نظام الحجوزات الذكي',
+                step1: 'الخدمات', step2: 'اختر الحلاق',
+                servicesTitle: 'اختر الخدمات المطلوبة', servicesSub: 'اختر خدمة أو أكثر',
+                totalLabel: 'المجموع:', next: 'التالي', back: 'رجوع',
+                staffTitle: 'اختر الحلاق', staffSub: 'اختر الحلاق المفضل لديك أو اختر "أي حلاق"',
+                confirmServices: 'الخدمات:', confirmTotal: 'المبلغ:', confirmStaff: 'الحلاق:',
+                confirmDuration: 'مدة الحجز:', confirmBooking: 'تأكيد الحجز',
+                anyBarber: 'أي حلاق', anyBarberDesc: 'غير مزدحم',
+                waitingTitle: 'جاري انتظار الموافقة', waitingSub: 'سيتم تأكيد حجزك من قبل المدير',
+                tempNumber: 'رقم الطلب المؤقت', viewQueue: 'عرض مكاني في الطابور',
+                navBook: 'حجز', navQueue: 'مكاني',
+                queueTitle: 'مكاني في الطابور', yourTurn: 'رقم دورك',
+                ahead: 'قبلك', waitTime: 'الوقت المتبقي', minutes: 'دقيقة',
+                currentServing: 'الرقم الحالي', newBooking: 'حجز موعد آخر',
+                noBookingTitle: 'ليس لديك حجز نشط', noBookingDesc: 'يمكنك حجز موعد جديد الآن',
+                newBookingBtn: 'حجز موعد جديد',
+                pendingReview: 'قيد المراجعة', waiting: 'في الانتظار', inProgress: 'جاري الخدمة',
+                noServices: 'لم يتم اختيار أي خدمة', noAhead: 'لا يوجد أحد قبلك',
+                toastSuccess: 'تم إرسال طلبك! رقم الطلب', toastError: 'يوجد خطأ في البيانات',
+                toastStaff: 'اختر حلاقاً', toastService: 'اختر خدمة واحدة على الأقل',
+                toastReset: 'تم إعادة تعيين الحجز', toastApproved: 'تمت الموافقة على حجزك!',
+                toastCompleted: 'تم إكمال دورك', toastCancelled: 'تم إلغاء الحجز',
+                toastOutsideHours: '⚠️ الوقت الحالي خارج أوقات العمل. أوقات العمل: {start} - {end}',
+                bookings: 'حجوزات', minutesShort: 'دقيقة', sar: 'ريال',
+                loading: 'جاري التحميل...', workHours: 'أوقات العمل', currentTime: 'الوقت الحالي',
+                outsideHours: '⚠️ خارج أوقات العمل', waitingApproval: '⏳ جاري الموافقة...',
+                yourTurnNow: '🔔 دورك الآن!', completed: '✅ تم إكمال دورك',
+                newRequest: '📩 تم إرسال طلب حجز جديد',
+                extendsNextDay: '(يمتد لليوم التالي)'
+            },
+            en: {
+                appTitle: 'Saloni', splashTitle: 'Saloni', splashSub: 'Smart Booking System',
+                step1: 'Services', step2: 'Choose Barber',
+                servicesTitle: 'Select Required Services', servicesSub: 'Select one or more services',
+                totalLabel: 'Total:', next: 'Next', back: 'Back',
+                staffTitle: 'Choose Barber', staffSub: 'Select your preferred barber or choose "Any Barber"',
+                confirmServices: 'Services:', confirmTotal: 'Amount:', confirmStaff: 'Barber:',
+                confirmDuration: 'Duration:', confirmBooking: 'Confirm Booking',
+                anyBarber: 'Any Barber', anyBarberDesc: 'Not busy',
+                waitingTitle: 'Waiting for Approval', waitingSub: 'Your booking will be confirmed by the manager',
+                tempNumber: 'Temporary Request Number', viewQueue: 'View My Position',
+                navBook: 'Booking', navQueue: 'My Turn',
+                queueTitle: 'My Position in Queue', yourTurn: 'Your Turn Number',
+                ahead: 'Ahead of You', waitTime: 'Estimated Wait', minutes: 'minutes',
+                currentServing: 'Currently Serving', newBooking: 'Book Another Appointment',
+                noBookingTitle: 'No Active Booking', noBookingDesc: 'You can book a new appointment now',
+                newBookingBtn: 'Book New Appointment',
+                pendingReview: 'Under Review', waiting: 'Waiting', inProgress: 'In Progress',
+                noServices: 'No services selected', noAhead: 'No one ahead of you',
+                toastSuccess: 'Your request has been sent! Request number', toastError: 'There is an error in the data',
+                toastStaff: 'Please select a barber', toastService: 'Please select at least one service',
+                toastReset: 'Booking has been reset', toastApproved: 'Your booking has been approved!',
+                toastCompleted: 'Your turn has been completed', toastCancelled: 'Booking has been cancelled',
+                toastOutsideHours: '⚠️ Current time is outside working hours. Working hours: {start} - {end}',
+                bookings: 'bookings', minutesShort: 'min', sar: 'SAR',
+                loading: 'Loading...', workHours: 'Working Hours', currentTime: 'Current Time',
+                outsideHours: '⚠️ Outside working hours', waitingApproval: '⏳ Pending Approval...',
+                yourTurnNow: '🔔 It\'s your turn now!', completed: '✅ Your turn is completed',
+                newRequest: '📩 New booking request sent',
+                extendsNextDay: '(extends to next day)'
+            },
+            ur: {
+                appTitle: 'صالونی', splashTitle: 'صالونی', splashSub: 'ذہین بکنگ سسٹم',
+                step1: 'خدمات', step2: 'حجام منتخب کریں',
+                servicesTitle: 'مطلوبہ خدمات منتخب کریں', servicesSub: 'ایک یا زیادہ خدمات منتخب کریں',
+                totalLabel: 'کل:', next: 'اگلا', back: 'واپس',
+                staffTitle: 'حجام منتخب کریں', staffSub: 'اپنا پسندیدہ حجام منتخب کریں یا "کوئی بھی حجام" منتخب کریں',
+                confirmServices: 'خدمات:', confirmTotal: 'رقم:', confirmStaff: 'حجام:',
+                confirmDuration: 'مدت:', confirmBooking: 'بکنگ کی تصدیق',
+                anyBarber: 'کوئی بھی حجام', anyBarberDesc: 'مصروف نہیں',
+                waitingTitle: 'منظوری کا انتظار', waitingSub: 'آپ کی بکنگ مینیجر کے ذریعہ تصدیق کی جائے گی',
+                tempNumber: 'عارضی درخواست نمبر', viewQueue: 'میری پوزیشن دیکھیں',
+                navBook: 'بکنگ', navQueue: 'میری باری',
+                queueTitle: 'قطار میں میری پوزیشن', yourTurn: 'آپ کی باری نمبر',
+                ahead: 'آپ سے پہلے', waitTime: 'متوقع انتظار', minutes: 'منٹ',
+                currentServing: 'ابھی خدمت ہو رہی ہے', newBooking: 'دوسری بکنگ کریں',
+                noBookingTitle: 'کوئی فعال بکنگ نہیں', noBookingDesc: 'آپ ابھی نئی بکنگ کر سکتے ہیں',
+                newBookingBtn: 'نئی بکنگ کریں',
+                pendingReview: 'زیر جائزہ', waiting: 'انتظار میں', inProgress: 'جاری ہے',
+                noServices: 'کوئی خدمت منتخب نہیں کی گئی', noAhead: 'آپ سے پہلے کوئی نہیں',
+                toastSuccess: 'آپ کی درخواست بھیج دی گئی! درخواست نمبر', toastError: 'ڈیٹا میں خرابی ہے',
+                toastStaff: 'براہ کرم حجام منتخب کریں', toastService: 'براہ کرم کم از کم ایک خدمت منتخب کریں',
+                toastReset: 'بکنگ دوبارہ ترتیب دی گئی', toastApproved: 'آپ کی بکنگ منظور ہوگئی!',
+                toastCompleted: 'آپ کی باری مکمل ہوگئی', toastCancelled: 'بکنگ منسوخ کردی گئی',
+                toastOutsideHours: '⚠️ موجودہ وقت کام کے اوقات سے باہر ہے۔ کام کے اوقات: {start} - {end}',
+                bookings: 'بکنگز', minutesShort: 'منٹ', sar: 'ریال',
+                loading: 'لوڈ ہو رہا ہے...', workHours: 'کام کے اوقات', currentTime: 'موجودہ وقت',
+                outsideHours: '⚠️ کام کے اوقات سے باہر', waitingApproval: '⏳ منظوری کا انتظار...',
+                yourTurnNow: '🔔 اب آپ کی باری ہے!', completed: '✅ آپ کی باری مکمل ہوگئی',
+                newRequest: '📩 نئی بکنگ کی درخواست بھیج دی گئی',
+                extendsNextDay: '(اگلے دن تک جاری)'
+            }
+        };
+
+        // ===== HELPERS =====
+        function getTranslation(key) {
+            return translations[currentLanguage]?.[key] || key;
+        }
+
+        function getServiceName(service) {
+            if (!service) return '';
+            if (currentLanguage === 'en') return service.name_en || service.name_ar || service.name;
+            if (currentLanguage === 'ur') return service.name_ur || service.name_ar || service.name;
+            return service.name_ar || service.name;
+        }
+
+        function getStaffName(staff) {
+            if (!staff) return '';
+            if (currentLanguage === 'en') return staff.name_en || staff.name_ar || staff.name;
+            if (currentLanguage === 'ur') return staff.name_ur || staff.name_ar || staff.name;
+            return staff.name_ar || staff.name;
+        }
+
+        function getCategoryTranslation(cat) {
+            const map = {
+                ar: { 'حلاقة': 'حلاقة', 'صبغة': 'صبغة', 'عناية': 'عناية', 'إضافات': 'إضافات', 'مناسبات': 'مناسبات' },
+                en: { 'حلاقة': 'Hair', 'صبغة': 'Dye', 'عناية': 'Care', 'إضافات': 'Extras', 'مناسبات': 'Events' },
+                ur: { 'حلاقة': 'بال', 'صبغة': 'رنگ', 'عناية': 'دیکھ بھال', 'إضافات': 'اضافی', 'مناسبات': 'تقریبات' }
+            };
+            return map[currentLanguage]?.[cat] || cat;
+        }
+
+        function showToast(msg, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const el = document.createElement('div');
+            el.className = `toast toast-${type}`;
+            el.textContent = msg;
+            container.appendChild(el);
+            setTimeout(() => { if (el.parentNode) el.remove(); }, 3000);
+        }
+
+        function closeNotification() {
+            document.getElementById('notificationModal').classList.remove('active');
+        }
+        window.closeNotification = closeNotification;
+
+        function showPage(id) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // ==============================================================
+        //  SOUND SYSTEM (Web Audio API)
+        // ==============================================================
+
+        let audioCtx = null;
+
+        function getAudioContext() {
+            if (!audioCtx) {
+                try {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                } catch (e) {
+                    console.warn('Web Audio API not supported');
+                }
+            }
+            return audioCtx;
+        }
+
+        function playBeep(freq = 800, duration = 300, type = 'sine', volume = 0.3) {
+            try {
+                const ctx = getAudioContext();
+                if (!ctx) return;
+                const oscillator = ctx.createOscillator();
+                const gainNode = ctx.createGain();
+                oscillator.connect(gainNode);
+                gainNode.connect(ctx.destination);
+                oscillator.frequency.value = freq;
+                oscillator.type = type;
+                gainNode.gain.setValueAtTime(volume, ctx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + duration / 1000);
+                oscillator.start();
+                oscillator.stop(ctx.currentTime + duration / 1000);
+            } catch (e) {
+                console.error('Audio error:', e);
+            }
+        }
+
+        function playNotificationSound() {
+            playBeep(600, 200, 'sine', 0.2);
+            setTimeout(() => playBeep(800, 200, 'sine', 0.2), 200);
+        }
+
+        function playTurnSound() {
+            playBeep(900, 300, 'sine', 0.3);
+            setTimeout(() => playBeep(1200, 300, 'sine', 0.3), 250);
+            setTimeout(() => playBeep(1500, 400, 'sine', 0.3), 500);
+        }
+
+        function playCompletedSound() {
+            playBeep(500, 400, 'sine', 0.25);
+            setTimeout(() => playBeep(700, 400, 'sine', 0.25), 350);
+            setTimeout(() => playBeep(900, 500, 'sine', 0.25), 700);
+        }
+
+        function playApprovedSound() {
+            playBeep(1000, 200, 'sine', 0.2);
+            setTimeout(() => playBeep(1200, 200, 'sine', 0.2), 200);
+            setTimeout(() => playBeep(1400, 300, 'sine', 0.2), 400);
+        }
+
+        // ==============================================================
+        //  LANGUAGE UI
+        // ==============================================================
+
+        window.toggleLangDropdown = function() {
+            document.getElementById('langDropdown').classList.toggle('open');
+            document.getElementById('langToggle').classList.toggle('open');
+        };
+
+        window.setLanguage = function(lang) {
+            currentLanguage = lang;
+            localStorage.setItem('preferred_language', lang);
+            applyTranslations();
+            document.getElementById('langDropdown').classList.remove('open');
+            document.getElementById('langToggle').classList.remove('open');
+            renderServices();
+            if (document.getElementById('stepStaff').classList.contains('active')) {
+                loadStaffWithCounts();
+            }
+            updateConfirmSummary();
+            updateTimeInfo();
+            showToast(getTranslation('toastSuccess') + ' (' + (lang === 'ar' ? 'العربية' : lang === 'en' ? 'English' : 'اردو') + ')', 'success');
+        };
+
+        function applyTranslations() {
+            const t = translations[currentLanguage];
+            if (!t) return;
+
+            document.documentElement.lang = currentLanguage;
+            document.documentElement.dir = currentLanguage === 'ar' || currentLanguage === 'ur' ? 'rtl' : 'ltr';
+            document.getElementById('htmlRoot').lang = currentLanguage;
+            document.getElementById('htmlRoot').dir = currentLanguage === 'ar' || currentLanguage === 'ur' ? 'rtl' : 'ltr';
+
+            document.getElementById('pageTitle').textContent = t.appTitle + ' | ' + (currentLanguage === 'en' ? 'Advanced Booking' : currentLanguage === 'ur' ? 'جدید بکنگ' : 'حجز متقدم');
+            document.getElementById('splashTitle').textContent = t.splashTitle;
+            document.getElementById('splashSub').textContent = t.splashSub;
+            document.getElementById('appTitle').textContent = t.appTitle;
+
+            document.getElementById('step1Label').textContent = t.step1;
+            document.getElementById('step2Label').textContent = t.step2;
+            document.getElementById('servicesTitle').textContent = t.servicesTitle;
+            document.getElementById('servicesSub').textContent = t.servicesSub;
+            document.getElementById('totalLabel').textContent = t.totalLabel;
+            document.getElementById('nextBtn1').textContent = t.next;
+            document.getElementById('staffTitle').textContent = t.staffTitle;
+            document.getElementById('staffSub').textContent = t.staffSub;
+            document.getElementById('backBtn2').textContent = t.back;
+            document.getElementById('confirmServicesFinalLabel').textContent = t.confirmServices;
+            document.getElementById('confirmTotalFinalLabel').textContent = t.confirmTotal;
+            document.getElementById('confirmStaffFinalLabel').textContent = t.confirmStaff;
+            document.getElementById('confirmDurationLabel').textContent = t.confirmDuration;
+            document.getElementById('confirmBtn').textContent = t.confirmBooking;
+            document.getElementById('waitingTitle').textContent = t.waitingTitle;
+            document.getElementById('waitingSub').textContent = t.waitingSub;
+            document.getElementById('tempNumberLabel').textContent = t.tempNumber;
+            document.getElementById('viewQueueBtn').textContent = t.viewQueue;
+            document.getElementById('navBookLabel').textContent = t.navBook;
+            document.getElementById('navQueueLabel').textContent = t.navQueue;
+            document.getElementById('navBookLabel2').textContent = t.navBook;
+            document.getElementById('navQueueLabel2').textContent = t.navQueue;
+            document.getElementById('queuePageTitle').textContent = t.queueTitle;
+            document.getElementById('yourTurnLabel').textContent = t.yourTurn;
+            document.getElementById('aheadLabel').textContent = t.ahead;
+            document.getElementById('waitLabel').textContent = t.waitTime;
+            document.getElementById('minutesLabel').textContent = t.minutes;
+            document.getElementById('currentServingLabel').textContent = t.currentServing;
+            document.getElementById('newBookingBtn').textContent = t.newBooking;
+            document.getElementById('noBookingTitle').textContent = t.noBookingTitle;
+            document.getElementById('noBookingDesc').textContent = t.noBookingDesc;
+            document.getElementById('newBookingBtn2').textContent = t.newBookingBtn;
+            document.getElementById('notifBtn').textContent = t.confirmBooking || 'حسناً';
+
+            const flags = { ar: '🇸🇦', en: '🇬🇧', ur: '🇵🇰' };
+            const labels = { ar: 'العربية', en: 'English', ur: 'اردو' };
+            document.getElementById('currentFlag').textContent = flags[currentLanguage] || '🇸🇦';
+            document.getElementById('currentLangLabel').textContent = labels[currentLanguage] || 'العربية';
+
+            document.querySelectorAll('.lang-option').forEach(opt => {
+                opt.classList.toggle('active', opt.dataset.lang === currentLanguage);
+            });
+
+            renderServices();
+            if (document.getElementById('stepStaff').classList.contains('active')) {
+                loadStaffWithCounts();
+            }
+            updateQueueStatusBadge();
+            updateConfirmSummary();
+            updateTimeInfo();
+        }
+
+        function updateQueueStatusBadge() {
+            const badge = document.getElementById('queueStatusBadge');
+            if (!badge) return;
+            const t = translations[currentLanguage];
+            const text = badge.textContent;
+            if (text.includes('قيد المراجعة') || text.includes('Under Review') || text.includes('زیر جائزہ')) {
+                badge.textContent = t.pendingReview;
+            } else if (text.includes('في الانتظار') || text.includes('Waiting') || text.includes('انتظار میں')) {
+                badge.textContent = t.waiting;
+            } else if (text.includes('جاري الخدمة') || text.includes('In Progress') || text.includes('جاری ہے')) {
+                badge.textContent = t.inProgress;
+            }
+        }
+
+        function updateConfirmSummary() {
+            const t = translations[currentLanguage];
+            const sarSymbol = t.sar || 'ريال';
+            document.getElementById('finalServicesList').textContent = selectedServices.map(s => getServiceName(s)).join('، ') || '-';
+            document.getElementById('finalTotalPrice').textContent = getTotalPrice() + ' ' + sarSymbol;
+            document.getElementById('finalStaffName').textContent = selectedStaff ? getStaffName(selectedStaff) : '-';
+            document.getElementById('finalDuration').textContent = BOOKING_DURATION + ' ' + (t.minutes || 'دقيقة');
+        }
+
+        // ===== TIME INFO WITH EXTENDED HOURS SUPPORT =====
+        function updateTimeInfo() {
+            const now = new Date();
+            const currentTime = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+            const start = workSchedule.startTime || '09:00';
+            const end = workSchedule.endTime || '17:00';
+            let displayEnd = end;
+            const [sH, sM] = start.split(':').map(Number);
+            const [eH, eM] = end.split(':').map(Number);
+            let endMinutes = eH * 60 + eM;
+            let startMinutes = sH * 60 + sM;
+            if (endMinutes < startMinutes) {
+                const t = translations[currentLanguage];
+                const extendsNote = t.extendsNextDay || '(يمتد لليوم التالي)';
+                displayEnd = end + ' ' + extendsNote;
+            }
+            document.getElementById('workHoursDisplay').textContent = start + ' - ' + displayEnd;
+            document.getElementById('currentTimeDisplay').textContent = currentTime;
+            const isWithin = isWithinWorkHours();
+            const statusDisplay = document.getElementById('statusTimeDisplay');
+            const t = translations[currentLanguage];
+            if (!isWithin) {
+                statusDisplay.style.display = 'inline';
+                statusDisplay.textContent = t.outsideHours || '⚠️ خارج أوقات العمل';
+                statusDisplay.style.color = '#E74C3C';
+            } else {
+                statusDisplay.style.display = 'none';
+            }
+        }
+
+        // ==============================================================
+        //  WORK HOURS CHECK (EXTENDED)
+        // ==============================================================
+
+        function isWithinWorkHours() {
+            const now = new Date();
+            const currentMinutes = now.getHours() * 60 + now.getMinutes();
+            const [sH, sM] = (workSchedule.startTime || '09:00').split(':').map(Number);
+            const [eH, eM] = (workSchedule.endTime || '17:00').split(':').map(Number);
+            const startMinutes = sH * 60 + sM;
+            let endMinutes = eH * 60 + eM;
+            if (endMinutes < startMinutes) {
+                endMinutes += 24 * 60;
+            }
+            const serviceEndMinutes = currentMinutes + BOOKING_DURATION;
+            return currentMinutes >= startMinutes && serviceEndMinutes <= endMinutes;
+        }
+
+        // ===== THEME =====
+        let isLightMode = false;
+        window.toggleTheme = function() {
+            isLightMode = !isLightMode;
+            const root = document.documentElement;
+            const toggle = document.getElementById('themeToggle');
+            const icon = document.getElementById('themeIcon');
+            if (isLightMode) {
+                root.setAttribute('data-theme', 'light');
+                toggle.classList.add('light');
+                icon.textContent = '☀️';
+            } else {
+                root.removeAttribute('data-theme');
+                toggle.classList.remove('light');
+                icon.textContent = '🌙';
+            }
+        };
+
+        // ===== NAVIGATION =====
+        window.switchTab = async function(tab) {
+            document.querySelectorAll('.bottom-nav .nav-item').forEach(b => b.classList.remove('active'));
+            if (tab === 'booking') {
+                showPage('page-booking');
+                const ids = ['navBook', 'navBook2'];
+                ids.forEach(id => { const el = document.getElementById(id); if (el) el.classList.add('active'); });
+                const waitingApproval = document.getElementById('waitingApproval');
+                if (waitingApproval) {
+                    const hasPendingApproval = myAppointments.some(a => a.status === 'pending_approval');
+                    if (!hasPendingApproval) waitingApproval.classList.add('hidden');
+                }
+            } else if (tab === 'queue') {
+                showPage('page-queue');
+                const ids = ['navQueue', 'navQueue2'];
+                ids.forEach(id => { const el = document.getElementById(id); if (el) el.classList.add('active'); });
+                await refreshMyAppointments(true);
+                updateQueueDisplay();
+            }
+        };
+
+        // ===== STEP MANAGEMENT =====
+        function updateStepUI(step) {
+            currentStep = step;
+            document.querySelectorAll('.step-dot').forEach((dot, i) => {
+                const num = i + 1;
+                dot.classList.remove('active', 'done');
+                if (num === step) dot.classList.add('active');
+                else if (num < step) dot.classList.add('done');
+            });
+            document.querySelectorAll('.step-label').forEach((label, i) => {
+                const num = i + 1;
+                label.classList.toggle('active', num === step);
+            });
+            const steps = ['stepServices', 'stepStaff'];
+            steps.forEach((id, i) => {
+                const el = document.getElementById(id);
+                if (el) el.classList.toggle('active', (i + 1) === step);
+            });
+        }
+
+        window.goToStep = function(step) {
+            const t = translations[currentLanguage];
+            if (step === 2 && selectedServices.length === 0) {
+                showToast(t.toastService || 'اختر خدمة واحدة على الأقل', 'error');
+                return;
+            }
+            if (step === 2) {
+                loadStaffWithCounts();
+                updateConfirmSummary();
+            }
+            updateStepUI(step);
+            document.querySelector('.container')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        };
+
+        // ===== SERVICES =====
+        function getTotalPrice() {
+            return selectedServices.reduce((sum, s) => sum + (s.price || 0), 0);
+        }
+
+        function toggleCategory(category) {
+            if (openCategory && openCategory !== category) {
+                const prevAccordion = document.querySelector(`[data-category="${openCategory}"]`);
+                if (prevAccordion) {
+                    prevAccordion.querySelector('.category-body').classList.remove('open');
+                    prevAccordion.querySelector('.category-header').classList.remove('open');
+                }
+            }
+            const accordion = document.querySelector(`[data-category="${category}"]`);
+            if (accordion) {
+                const body = accordion.querySelector('.category-body');
+                const header = accordion.querySelector('.category-header');
+                const isOpen = body.classList.contains('open');
+                if (isOpen) {
+                    body.classList.remove('open');
+                    header.classList.remove('open');
+                    openCategory = null;
+                } else {
+                    body.classList.add('open');
+                    header.classList.add('open');
+                    openCategory = category;
+                }
+            }
+        }
+
+        function renderServices() {
+            const container = document.getElementById('servicesContainer');
+            if (!container) return;
+            const activeServices = allServices.filter(s => s.active !== false);
+            if (activeServices.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align:center;padding:30px 10px;color:var(--text-muted);">
+                        <span style="font-size:32px;">📭</span><br>
+                        <span style="font-size:16px;font-weight:600;">لا توجد خدمات متاحة حالياً</span>
+                    </div>
+                `;
+                return;
+            }
+            const categories = {};
+            activeServices.forEach(s => {
+                const cat = s.category || 'خدمات';
+                if (!categories[cat]) categories[cat] = [];
+                categories[cat].push(s);
+            });
+            const categoryOrder = ['حلاقة', 'صبغة', 'عناية', 'إضافات', 'مناسبات'];
+            const sortedCategories = Object.keys(categories).sort((a, b) => {
+                const idxA = categoryOrder.indexOf(a);
+                const idxB = categoryOrder.indexOf(b);
+                if (idxA === -1) return 1;
+                if (idxB === -1) return -1;
+                return idxA - idxB;
+            });
+            const t = translations[currentLanguage];
+            const sarSymbol = t.sar || 'ريال';
+            let html = '';
+            sortedCategories.forEach(cat => {
+                const services = categories[cat];
+                const isOpen = openCategory === cat;
+                const translatedCat = getCategoryTranslation(cat);
+                html += `
+                    <div class="category-accordion" data-category="${cat}">
+                        <button class="category-header ${isOpen ? 'open' : ''}" onclick="toggleCategory('${cat}')">
+                            <span>${translatedCat}</span>
+                            <span class="arrow">▼</span>
+                        </button>
+                        <div class="category-body ${isOpen ? 'open' : ''}">
+                            <div class="service-grid">
+                                ${services.map(s => {
+                                    const selected = selectedServices.some(ss => ss.id === s.id);
+                                    const serviceName = getServiceName(s);
+                                    return `
+                                        <div class="service-card ${selected ? 'selected' : ''}" onclick="toggleService('${s.id}')">
+                                            <span class="service-check">✓</span>
+                                            <div class="service-name">${serviceName}</div>
+                                            <div class="service-price">${s.price} ${sarSymbol}</div>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+            updateSelectedUI();
+        }
+
+        window.toggleService = function(id) {
+            const service = allServices.find(s => s.id === id);
+            if (!service) return;
+            const index = selectedServices.findIndex(s => s.id === id);
+            if (index > -1) {
+                selectedServices.splice(index, 1);
+            } else {
+                selectedServices.push({ ...service });
+            }
+            renderServices();
+            if (currentStep === 2) updateConfirmSummary();
+        };
+
+        window.toggleCategory = toggleCategory;
+
+        function updateSelectedUI() {
+            const list = document.getElementById('selectedServicesList');
+            const total = document.getElementById('totalPrice');
+            const t = translations[currentLanguage];
+            const sarSymbol = t.sar || 'ريال';
+            if (selectedServices.length === 0) {
+                list.innerHTML = `<span class="text-muted" style="font-size:14px;">${t.noServices || 'لم يتم اختيار أي خدمة'}</span>`;
+            } else {
+                list.innerHTML = selectedServices.map(s => {
+                    const name = getServiceName(s);
+                    return `
+                        <span class="selected-service-tag">
+                            ${name} (${s.price} ${sarSymbol})
+                            <button class="remove-btn" onclick="toggleService('${s.id}')">✕</button>
+                        </span>
+                    `;
+                }).join('');
+            }
+            total.textContent = getTotalPrice() + ' ' + sarSymbol;
+        }
+
+        // ===== WORK SCHEDULE =====
+        function loadWorkSchedule() {
+            if (!isGistConfigured) return;
+            try {
+                const settings = db.getCache().settings || {};
+                workSchedule = {
+                    startTime: settings.workStart || '09:00',
+                    endTime: settings.workEnd || '17:00'
+                };
+                updateTimeInfo();
+            } catch (e) { console.error('Error loading work schedule:', e); }
+        }
+
+        // ===== SELECT BEST BARBER =====
+        function selectBestBarber() {
+            const today = new Date().toISOString().split('T')[0];
+            const activeBarbers = allStaff.filter(st => st.active !== false);
+            if (activeBarbers.length === 0) return null;
+
+            const appointments = db.getCache().appointments || [];
+            const todayAppointments = appointments.filter(a => 
+                a.date === today && 
+                (a.status === 'pending' || a.status === 'pending_approval' || a.status === 'in_progress')
+            );
+
+            const barberLoad = activeBarbers.map(barber => {
+                const count = todayAppointments.filter(a => a.staff_id === barber.id).length;
+                const totalTime = count * BOOKING_DURATION;
+                return { ...barber, count, totalTime };
+            });
+
+            barberLoad.sort((a, b) => {
+                if (a.count !== b.count) return a.count - b.count;
+                return a.totalTime - b.totalTime;
+            });
+
+            return barberLoad[0];
+        }
+
+        // ===== STAFF =====
+        function loadStaffWithCounts() {
+            if (!isGistConfigured) {
+                renderStaff();
+                return;
+            }
+            const today = new Date().toISOString().split('T')[0];
+            const appointments = db.getCache().appointments || [];
+            const todayAppointments = appointments.filter(a => a.date === today);
+            const activeStaff = allStaff.filter(st => st.active !== false);
+            const staffCounts = {};
+            activeStaff.forEach(st => {
+                const count = todayAppointments.filter(a =>
+                    a.staff_id === st.id &&
+                    (a.status === 'pending' || a.status === 'in_progress' || a.status === 'pending_approval')
+                ).length;
+                staffCounts[st.id] = count;
+            });
+            renderStaff(staffCounts, activeStaff);
+        }
+
+        function renderStaff(counts = {}, staffList = null) {
+            const grid = document.getElementById('staffGrid');
+            if (!grid) return;
+            const t = translations[currentLanguage];
+            const activeStaff = staffList || allStaff.filter(st => st.active !== false);
+            if (activeStaff.length === 0) {
+                grid.innerHTML = `
+                    <div style="text-align:center;padding:30px 10px;color:var(--text-muted);grid-column:1/-1;">
+                        <span style="font-size:32px;">👨‍💼</span><br>
+                        <span style="font-size:16px;font-weight:600;">لا يوجد حلاقون متاحون حالياً</span>
+                    </div>
+                `;
+                return;
+            }
+            let html = `
+                <div class="staff-card any-barber ${selectedStaff?.id === 'any' ? 'selected' : ''}" onclick="selectStaff('any')">
+                    <span class="staff-check">✓</span>
+                    <div class="staff-name">${t.anyBarber || 'أي حلاق'}</div>
+                    <div class="staff-stats">${t.anyBarberDesc || 'غير مزدحم'}</div>
+                </div>
+            `;
+            html += activeStaff.map(st => {
+                const count = counts[st.id] || 0;
+                const totalTime = count * BOOKING_DURATION;
+                const selected = selectedStaff?.id === st.id;
+                const name = getStaffName(st);
+                return `
+                    <div class="staff-card ${selected ? 'selected' : ''}" onclick="selectStaff('${st.id}')">
+                        <span class="staff-check">✓</span>
+                        <div class="staff-name">${name}</div>
+                        <div class="staff-stats">
+                            <span>📋 ${count} ${t.bookings || 'حجوزات'}</span>
+                            <span>⏱ ${totalTime} ${t.minutesShort || 'دقيقة'}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            grid.innerHTML = html;
+        }
+
+        window.selectStaff = function(id) {
+            if (id === 'any') {
+                selectedStaff = { id: 'any', nameAr: 'أي حلاق', nameEn: 'Any Barber', nameUr: 'کوئی بھی حجام' };
+            } else {
+                selectedStaff = allStaff.find(st => st.id === id);
+            }
+            renderStaff();
+            updateConfirmSummary();
+        };
+
+        function loadStaff() {
+            if (!isGistConfigured) return;
+            allStaff = db.getCache().staff || [];
+            if (document.getElementById('stepStaff').classList.contains('active')) {
+                loadStaffWithCounts();
+            }
+        }
+
+        // ==============================================================
+        //  LOAD DATA FROM SUPABASE
+        // ==============================================================
+
+        async function loadAllData() {
+            if (!isGistConfigured) return;
+            try {
+                const cache = db.getCache();
+                allServices = cache.services || [];
+                allStaff = cache.staff || [];
+                const settings = cache.settings || {};
+                workSchedule = {
+                    startTime: settings.workStart || '09:00',
+                    endTime: settings.workEnd || '17:00'
+                };
+                selectedServices = selectedServices.map(s => {
+                    const updated = allServices.find(as => as.id === s.id);
+                    return updated ? { ...updated } : s;
+                }).filter(s => allServices.some(as => as.id === s.id));
+                if (selectedStaff && selectedStaff.id !== 'any') {
+                    const updated = allStaff.find(st => st.id === selectedStaff.id);
+                    if (updated) selectedStaff = { ...updated };
+                    else selectedStaff = null;
+                }
+                renderServices();
+                if (document.getElementById('stepStaff').classList.contains('active')) {
+                    loadStaffWithCounts();
+                }
+                updateTimeInfo();
+                await refreshMyAppointments(true);
+            } catch (e) {
+                console.error('Load data error:', e);
+            }
+        }
+
+        // ==============================================================
+        //  SUPABASE CONNECTION + REALTIME
+        // ==============================================================
+
+        let reconnectAttempts = 0;
+        const MAX_RECONNECT_ATTEMPTS = 20;
+
+        function setupGist() {
+            db.init().then(connected => {
+                if (connected) {
+                    isGistConfigured = true;
+                    reconnectAttempts = 0;
+                    console.log('✅ Supabase connected');
+                    loadAllData();
+                    // تسجيل المستمعين للتحديث الفوري
+                    db.on('appointments', async (payload, appointments) => {
+                        if (_updateLock) return;
+                        _updateLock = true;
+                        try {
+                            await refreshMyAppointments(true);
+                            updateQueueDisplay();
+                        } finally {
+                            _updateLock = false;
+                        }
+                    });
+                    db.on('services', () => {
+                        allServices = db.getCache().services || [];
+                        selectedServices = selectedServices.map(s => {
+                            const updated = allServices.find(as => as.id === s.id);
+                            return updated ? { ...updated } : s;
+                        }).filter(s => allServices.some(as => as.id === s.id));
+                        renderServices();
+                        if (currentStep === 2) updateConfirmSummary();
+                        console.log('🔄 Services updated in real-time');
+                    });
+                    db.on('staff', () => {
+                        allStaff = db.getCache().staff || [];
+                        if (selectedStaff && selectedStaff.id !== 'any') {
+                            const updated = allStaff.find(st => st.id === selectedStaff.id);
+                            if (updated) selectedStaff = { ...updated };
+                            else selectedStaff = null;
+                        }
+                        if (document.getElementById('stepStaff').classList.contains('active')) {
+                            loadStaffWithCounts();
+                        }
+                        if (currentStep === 2) updateConfirmSummary();
+                        console.log('🔄 Staff updated in real-time');
+                    });
+                    db.on('settings', () => {
+                        const settings = db.getCache().settings || {};
+                        workSchedule = {
+                            startTime: settings.workStart || '09:00',
+                            endTime: settings.workEnd || '17:00'
+                        };
+                        updateTimeInfo();
+                        console.log('🔄 Settings updated in real-time');
+                    });
+                    console.log('✅ Realtime listeners registered');
+                } else {
+                    reconnectAttempts++;
+                    if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+                        console.warn(`⚠️ Supabase connection failed, retry ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS}...`);
+                        setTimeout(() => setupGist(), 3000);
+                    } else {
+                        console.error('❌ Supabase connection failed after max attempts');
+                        showToast('⚠️ فشل الاتصال بقاعدة البيانات، حاول تحديث الصفحة', 'error');
+                    }
+                }
+            });
+        }
+
+        // ==============================================================
+        //  REFRESH MY APPOINTMENTS (مع الأصوات عند تغير الحالة)
+        // ==============================================================
+
+        async function refreshMyAppointments(force = false) {
+            if (!isGistConfigured || !userId) return;
+            try {
+                const allAppointments = db.getCache().appointments || [];
+                const newMyAppointments = allAppointments.filter(a => a.user_id === userId)
+                    .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+
+                const oldAppointments = myAppointments;
+                myAppointments = newMyAppointments;
+
+                const oldActive = oldAppointments.find(a => a.status === 'pending_approval' || a.status === 'pending' || a.status === 'in_progress');
+                const newActive = myAppointments.find(a => a.status === 'pending_approval' || a.status === 'pending' || a.status === 'in_progress');
+
+                const newPendingApproval = myAppointments.find(a => a.status === 'pending_approval' && 
+                    !oldAppointments.some(o => o.id === a.id && o.status === 'pending_approval'));
+                if (newPendingApproval) {
+                    playNotificationSound();
+                    showToast(getTranslation('newRequest') + ' #' + newPendingApproval.queue_number, 'success');
+                }
+
+                if (oldActive && newActive) {
+                    if (oldActive.status === 'pending' && newActive.status === 'in_progress' && oldActive.id === newActive.id) {
+                        playTurnSound();
+                        showToast(getTranslation('yourTurnNow'), 'success');
+                    }
+                }
+
+                const completedAppt = myAppointments.find(a => a.status === 'completed' && 
+                    !oldAppointments.some(o => o.id === a.id && o.status === 'completed'));
+                if (completedAppt && oldAppointments.some(o => o.id === completedAppt.id && (o.status === 'pending' || o.status === 'in_progress'))) {
+                    playCompletedSound();
+                    showToast(getTranslation('completed'), 'success');
+                }
+
+                const pendingApproval = myAppointments.find(a => a.status === 'pending_approval');
+                const waitingApproval = document.getElementById('waitingApproval');
+                if (pendingApproval) {
+                    if (waitingApproval) {
+                        waitingApproval.classList.remove('hidden');
+                        document.getElementById('tempQueueNumber').textContent = pendingApproval.queue_number || '--';
+                        document.getElementById('stepServices').classList.remove('active');
+                        document.getElementById('stepStaff').classList.remove('active');
+                    }
+                } else {
+                    if (waitingApproval) waitingApproval.classList.add('hidden');
+                    const approved = myAppointments.find(a => a.status === 'pending' && !a.staff_id);
+                    if (approved) {
+                        const pendingApproval2 = myAppointments.find(a => a.status === 'pending_approval');
+                        if (!pendingApproval2) {
+                            if (waitingApproval) waitingApproval.classList.add('hidden');
+                            showToast(getTranslation('toastApproved'), 'success');
+                        }
+                    }
+                }
+                updateQueueDisplay();
+            } catch (e) {
+                console.error('Error refreshing appointments:', e);
+            }
+        }
+
+        // ==============================================================
+        //  CONFIRM BOOKING
+        // ==============================================================
+
+        window.confirmBooking = async function() {
+            const t = translations[currentLanguage];
+            if (selectedServices.length === 0) {
+                showToast(t.toastService || 'اختر خدمة واحدة على الأقل', 'error');
+                return;
+            }
+
+            let finalStaff = selectedStaff;
+            if (selectedStaff && selectedStaff.id === 'any') {
+                const bestBarber = selectBestBarber();
+                if (bestBarber) {
+                    finalStaff = bestBarber;
+                    selectedStaff = finalStaff;
+                    renderStaff();
+                    updateConfirmSummary();
+                    showToast('تم اختيار الحلاق ' + getStaffName(finalStaff) + ' تلقائياً', 'info');
+                } else {
+                    showToast('لا يوجد حلاقون متاحون حالياً', 'error');
+                    return;
+                }
+            }
+
+            if (!finalStaff) {
+                showToast(t.toastStaff || 'اختر حلاقاً', 'error');
+                return;
+            }
+
+            if (!isWithinWorkHours()) {
+                const start = workSchedule.startTime || '09:00';
+                const end = workSchedule.endTime || '17:00';
+                const msg = t.toastOutsideHours || '⚠️ الوقت الحالي خارج أوقات العمل. أوقات العمل: {start} - {end}';
+                showToast(msg.replace('{start}', start).replace('{end}', end), 'error');
+                return;
+            }
+
+            if (!isGistConfigured) {
+                showToast('⚠️ قاعدة البيانات غير متصلة', 'error');
+                return;
+            }
+
+            try {
+                const today = new Date().toISOString().split('T')[0];
+                const now = new Date();
+                const currentTime = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+
+                const appointments = db.getCache().appointments || [];
+                const todayAppointments = appointments.filter(a => a.date === today);
+                let maxNum = 0;
+                todayAppointments.forEach(a => {
+                    if (a.queue_number && a.queue_number > maxNum) maxNum = a.queue_number;
+                });
+                const newQueueNum = maxNum + 1;
+
+                const totalPrice = getTotalPrice();
+                const serviceNames = selectedServices.map(s => getServiceName(s)).join('، ');
+                const staffName = getStaffName(finalStaff);
+
+                const newAppointment = {
+                    id: 'app_' + Date.now(),
+                    user_id: userId,
+                    customer_name: 'عميل',
+                    services: selectedServices.map(s => ({ id: s.id, name: getServiceName(s), price: s.price })),
+                    service_names: serviceNames,
+                    total_price: totalPrice,
+                    date: today,
+                    time: currentTime,
+                    queue_number: newQueueNum,
+                    status: 'pending_approval',
+                    staff_id: finalStaff.id === 'any' ? null : finalStaff.id,
+                    staff_name: staffName,
+                    duration: BOOKING_DURATION,
+                    admin_notes: ''
+                };
+
+                await db.addAppointment(newAppointment);
+                await refreshMyAppointments(true);
+
+                document.getElementById('tempQueueNumber').textContent = newQueueNum;
+                document.getElementById('stepServices').classList.remove('active');
+                document.getElementById('stepStaff').classList.remove('active');
+                document.getElementById('waitingApproval').classList.remove('hidden');
+
+                showToast(`${t.toastSuccess || 'تم إرسال طلبك! رقم الطلب'} ${newQueueNum}`, 'success');
+
+                selectedServices = [];
+                selectedStaff = null;
+                renderServices();
+                updateQueueDisplay();
+            } catch (e) {
+                console.error(e);
+                showToast('خطأ: ' + e.message, 'error');
+            }
+        };
+
+        // ==============================================================
+        //  RESET BOOKING
+        // ==============================================================
+
+        window.resetBooking = function() {
+            const t = translations[currentLanguage];
+            activeQueueAppointment = null;
+            tempQueueNumber = null;
+            selectedStaff = null;
+            selectedServices = [];
+            renderServices();
+            document.getElementById('waitingApproval').classList.add('hidden');
+            updateStepUI(1);
+            updateQueueDisplay();
+            switchTab('booking');
+            showToast(t.toastReset || 'تم إعادة تعيين الحجز', 'info');
+        };
+
+        // ==============================================================
+        //  QUEUE DISPLAY (مع حساب دقيق للعدد القبلك)
+        // ==============================================================
+
+        function updateQueueDisplay() {
+            const container = document.getElementById('queueStatusContainer');
+            const noBooking = document.getElementById('noActiveBooking');
+            if (!container) return;
+
+            const t = translations[currentLanguage];
+
+            const pendingApproval = myAppointments.find(a => a.status === 'pending_approval');
+            if (pendingApproval) {
+                container.classList.remove('hidden');
+                noBooking.classList.add('hidden');
+                document.getElementById('myQueueNumber').textContent = pendingApproval.queue_number || '--';
+                document.getElementById('queueStatusBadge').textContent = t.pendingReview || 'قيد المراجعة';
+                document.getElementById('queueStatusBadge').style.background = 'rgba(243,156,18,0.2)';
+                document.getElementById('queueStatusBadge').style.color = '#F39C12';
+                document.getElementById('aheadCount').textContent = '-';
+                document.getElementById('waitTime').textContent = '-';
+                document.getElementById('currentServingNum').textContent = '--';
+                document.getElementById('aheadNumbers').innerHTML = `<span class="text-muted" style="font-size:14px;">${t.waiting || 'في انتظار موافقة المدير'}</span>`;
+                return;
+            }
+
+            const activeAppt = myAppointments.find(a => a.status === 'pending' || a.status === 'in_progress');
+            if (!activeAppt) {
+                container.classList.add('hidden');
+                noBooking.classList.remove('hidden');
+                return;
+            }
+
+            activeQueueAppointment = activeAppt;
+            container.classList.remove('hidden');
+            noBooking.classList.add('hidden');
+
+            document.getElementById('myQueueNumber').textContent = activeQueueAppointment.queue_number || '--';
+
+            const statusMap = {
+                'pending': t.waiting || 'في الانتظار',
+                'in_progress': t.inProgress || 'جاري الخدمة'
+            };
+            document.getElementById('queueStatusBadge').textContent = statusMap[activeQueueAppointment.status] || t.waiting || 'في الانتظار';
+            document.getElementById('queueStatusBadge').style.background = activeQueueAppointment.status === 'in_progress' ?
+                'rgba(52,152,219,0.2)' : 'rgba(212,175,55,0.15)';
+            document.getElementById('queueStatusBadge').style.color = activeQueueAppointment.status === 'in_progress' ?
+                '#3498DB' : 'var(--gold)';
+
+            if (activeQueueAppointment.date) {
+                const appointments = db.getCache().appointments || [];
+                const todayAppointments = appointments.filter(a => a.date === activeQueueAppointment.date);
+
+                const inProgress = todayAppointments.find(a => a.status === 'in_progress');
+                const currentNum = inProgress ? inProgress.queue_number : null;
+                const myNum = activeQueueAppointment.queue_number;
+
+                // عدد الأشخاص قبلي (نفس الحلاق أو أي حلاق إذا لم يكن محدداً)
+                const myStaffId = activeQueueAppointment.staff_id;
+                const ahead = todayAppointments.filter(a =>
+                    a.queue_number < myNum &&
+                    (a.staff_id === myStaffId || !myStaffId) &&
+                    (a.status === 'pending' || a.status === 'in_progress')
+                ).length;
+
+                const avgTime = BOOKING_DURATION;
+                const waitTime = ahead * avgTime;
+
+                document.getElementById('aheadCount').textContent = ahead;
+                document.getElementById('waitTime').textContent = waitTime;
+                document.getElementById('currentServingNum').textContent = currentNum || '--';
+
+                const aheadNums = todayAppointments
+                    .filter(a => 
+                        a.queue_number < myNum && 
+                        a.queue_number > 0 && 
+                        a.queue_number >= (currentNum || 0) &&
+                        (a.staff_id === myStaffId || !myStaffId)
+                    )
+                    .sort((a, b) => a.queue_number - b.queue_number)
+                    .map(a => `#${a.queue_number}`);
+
+                if (aheadNums.length > 0) {
+                    document.getElementById('aheadNumbers').innerHTML = aheadNums.map(n =>
+                        `<span style="padding:6px 14px;background:rgba(255,255,255,0.05);border-radius:40px;font-size:15px;font-weight:600;">${n}</span>`
+                    ).join('');
+                } else {
+                    document.getElementById('aheadNumbers').innerHTML = `<span class="text-muted" style="font-size:14px;">${t.noAhead || 'لا يوجد أحد قبلك'}</span>`;
+                }
+
+                const updated = todayAppointments.find(a => a.id === activeQueueAppointment.id);
+                if (updated && (updated.status === 'completed' || updated.status === 'cancelled')) {
+                    activeQueueAppointment = null;
+                    refreshMyAppointments(true);
+                    updateQueueDisplay();
+                    if (updated.status === 'completed') {
+                        playCompletedSound();
+                        showToast(t.completed || 'تم إكمال دورك', 'success');
+                    } else {
+                        showToast(t.toastCancelled || 'تم إلغاء الحجز', 'info');
+                    }
+                }
+            }
+        }
+
+        // ==============================================================
+        //  BACKGROUND UPDATES
+        // ==============================================================
+
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && isGistConfigured) {
+                console.log('🔄 Tab became visible - Refreshing data');
+                refreshMyAppointments(true);
+                updateQueueDisplay();
+                loadAllData();
+            }
+        });
+
+        setInterval(() => {
+            if (isGistConfigured) {
+                refreshMyAppointments(true);
+                updateQueueDisplay();
+            }
+        }, 30000);
+
+        // ==============================================================
+        //  INIT
+        // ==============================================================
+
+        function init() {
+            const savedLang = localStorage.getItem('preferred_language');
+            if (savedLang && translations[savedLang]) {
+                currentLanguage = savedLang;
+            }
+
+            setTimeout(() => {
+                const splash = document.getElementById('splashScreen');
+                if (splash) splash.style.display = 'none';
+                const app = document.getElementById('appContainer');
+                if (app) app.style.display = 'block';
+                applyTranslations();
+                updateTimeInfo();
+                setInterval(updateTimeInfo, 1000);
+            }, 1800);
+
+            setupGist();
+
+            document.addEventListener('click', function(e) {
+                const wrapper = document.querySelector('.lang-toggle-wrapper');
+                if (wrapper && !wrapper.contains(e.target)) {
+                    document.getElementById('langDropdown').classList.remove('open');
+                    document.getElementById('langToggle').classList.remove('open');
+                }
+            });
+
+            window.toggleService = toggleService;
+            window.toggleCategory = toggleCategory;
+            window.selectStaff = selectStaff;
+            window.goToStep = goToStep;
+            window.confirmBooking = confirmBooking;
+            window.resetBooking = resetBooking;
+            window.switchTab = switchTab;
+            window.toggleTheme = toggleTheme;
+            window.closeNotification = closeNotification;
+            window.toggleLangDropdown = toggleLangDropdown;
+            window.setLanguage = setLanguage;
+
+            updateStepUI(1);
+        }
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/gggg/service-worker.js').catch(() => {});
+        }
+
+        init();
+    </script>
+</body>
+</html>

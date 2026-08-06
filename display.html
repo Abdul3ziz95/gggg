@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0">
+    <title>صالوني - شاشة العرض</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-client.js"></script>
+    <style>
+        /* ===== RESET & ROOT ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --gold: #eab345;
+            --gold-dark: #b8860b;
+            --bg-primary: #0b0c10;
+            --bg-card: #14151a;
+            --border-color: #24262d;
+            --text-primary: #ffffff;
+            --text-muted: #8a8d98;
+            --shadow: 0 12px 30px rgba(0,0,0,0.5);
+            --radius: 18px;
+            --font: 'Tajawal', sans-serif;
+        }
+
+        body {
+            font-family: var(--font);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1.5vh 1.5vw;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(255, 215, 0, 0.04) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(255, 215, 0, 0.06) 0%, transparent 50%);
+        }
+
+        .dashboard {
+            width: 100%;
+            max-width: 1800px;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5vh;
+            height: 100vh;
+            height: 100dvh;
+            max-height: 100vh;
+            max-height: 100dvh;
+            overflow: hidden;
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 1.2vh 2vw;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+            min-height: 70px;
+            backdrop-filter: blur(8px);
+            flex-wrap: wrap;
+            gap: 0.5vh;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 1.2vw;
+        }
+
+        .logo {
+            width: 5vh;
+            height: 5vh;
+            min-width: 45px;
+            min-height: 45px;
+            border-radius: 50%;
+            border: 1px solid rgba(234, 179, 69, 0.4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.4vh;
+            color: var(--gold);
+            box-shadow: inset 0 0 20px rgba(234, 179, 69, 0.08), 0 0 25px rgba(234, 179, 69, 0.12);
+            background: #1a1b20;
+        }
+
+        .brand-text h1 {
+            font-size: 2.6vh;
+            font-weight: 900;
+            color: var(--gold);
+            line-height: 1.1;
+        }
+
+        .brand-text span {
+            font-size: 1.4vh;
+            color: var(--text-muted);
+        }
+
+        .datetime {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 0.2vh;
+        }
+
+        .time-row {
+            display: flex;
+            align-items: center;
+            gap: 0.6vw;
+            font-size: 2.6vh;
+            font-weight: 700;
+            font-family: monospace;
+            letter-spacing: 1px;
+        }
+
+        .time-row i { color: var(--gold); font-size: 2vh; }
+        .time-row .ampm { font-size: 1.8vh; color: var(--text-muted); margin-right: 0.3vw; }
+
+        .date-row {
+            color: var(--text-muted);
+            font-size: 1.4vh;
+            display: flex;
+            gap: 0.4vw;
+            align-items: center;
+        }
+
+        .work-hours-display {
+            color: var(--text-muted);
+            font-size: 1.4vh;
+            background: rgba(255,215,0,0.06);
+            padding: 0.4vh 1vw;
+            border-radius: 30px;
+            border: 1px solid rgba(255,215,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 0.4vw;
+        }
+        .work-hours-display i {
+            color: var(--gold);
+        }
+        .work-hours-display .hours-value {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        /* ===== BARBERS GRID ===== */
+        .barbers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.2vw;
+            flex: 1;
+            min-height: 0;
+            align-content: start;
+        }
+
+        .barber-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 2vh 1.2vw;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            min-height: 180px;
+            backdrop-filter: blur(4px);
+        }
+
+        .barber-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at center, rgba(234, 179, 69, 0.03) 0%, transparent 60%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+        }
+
+        .barber-card:hover::before {
+            opacity: 1;
+        }
+
+        .barber-card:hover {
+            border-color: rgba(234, 179, 69, 0.25);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow);
+        }
+
+        .barber-avatar {
+            width: 7vh;
+            height: 7vh;
+            min-width: 55px;
+            min-height: 55px;
+            border-radius: 50%;
+            background: #1f2026;
+            border: 2px solid rgba(234, 179, 69, 0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3.5vh;
+            color: var(--gold);
+            margin-bottom: 1vh;
+            transition: all 0.3s ease;
+        }
+
+        .barber-card:hover .barber-avatar {
+            border-color: var(--gold);
+            box-shadow: 0 0 30px rgba(234, 179, 69, 0.15);
+        }
+
+        .barber-name {
+            font-size: 2.2vh;
+            font-weight: 800;
+            color: #f0e6d0;
+            margin-bottom: 0.4vh;
+            text-align: center;
+        }
+
+        .barber-status {
+            display: flex;
+            align-items: center;
+            gap: 0.6vw;
+            font-size: 1.3vh;
+            color: var(--text-muted);
+            margin-bottom: 1vh;
+        }
+
+        .dot-online {
+            width: 1.2vh;
+            height: 1.2vh;
+            border-radius: 50%;
+            background: #2ecc71;
+            box-shadow: 0 0 12px #2ecc71;
+            animation: pulse 1.8s infinite alternate;
+        }
+
+        .dot-offline {
+            width: 1.2vh;
+            height: 1.2vh;
+            border-radius: 50%;
+            background: #555;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.5; transform: scale(0.9); }
+            100% { opacity: 1; transform: scale(1.2); }
+        }
+
+        .barber-stats {
+            display: flex;
+            justify-content: center;
+            gap: 1.5vw;
+            width: 100%;
+            margin: 0.4vh 0;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 3vh;
+            font-weight: 900;
+            color: var(--gold);
+            line-height: 1.2;
+        }
+
+        .stat-label {
+            font-size: 1.2vh;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .barber-queue {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.4vw;
+            margin-top: 0.8vh;
+            min-height: 3vh;
+        }
+
+        .queue-badge {
+            background: #1f2026;
+            border: 1px solid #2a2b33;
+            border-radius: 30px;
+            padding: 0.2vh 0.8vw;
+            font-size: 1.6vh;
+            font-weight: 700;
+            color: #c0b8a8;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.2vw;
+            transition: all 0.2s ease;
+        }
+
+        .queue-badge.active {
+            border-color: var(--gold);
+            color: var(--gold);
+            background: rgba(234, 179, 69, 0.06);
+        }
+
+        .queue-badge .hash {
+            color: #666;
+            font-weight: 500;
+        }
+
+        .barber-empty {
+            color: #555;
+            font-size: 1.2vh;
+            margin-top: 0.4vh;
+        }
+
+        /* ===== STATS ROW ===== */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1vw;
+            flex-shrink: 0;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.2vh 1.5vw;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            backdrop-filter: blur(4px);
+        }
+
+        .stat-card .stat-info {
+            display: flex;
+            flex-direction: column;
+        }
+        .stat-card .stat-label {
+            color: var(--text-muted);
+            font-size: 1.3vh;
+        }
+        .stat-card .stat-number {
+            font-size: 3vh;
+            font-weight: 800;
+            color: #ffffff;
+            line-height: 1.2;
+        }
+
+        .stat-card .stat-icon {
+            width: 5vh;
+            height: 5vh;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.2vh;
+            background: #1a1b20;
+        }
+
+        .icon-gold { border: 1px solid var(--gold); color: var(--gold); box-shadow: inset 0 0 15px rgba(234, 179, 69, 0.06); }
+        .icon-blue { border: 1px solid #3498db; color: #3498db; }
+        .icon-green { border: 1px solid #2ecc71; color: #2ecc71; }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            text-align: center;
+            color: #666;
+            font-size: 1.2vh;
+            flex-shrink: 0;
+            line-height: 1.2;
+            padding: 0.5vh 0;
+        }
+        .footer i { color: #946927; margin: 0 0.3vw; }
+
+        /* ================================================================
+           RESPONSIVE BREAKPOINTS
+           ================================================================ */
+
+        /* شاشات كبيرة جداً (TV, 4K) */
+        @media (min-width: 1920px) {
+            .barbers-grid {
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                gap: 1.5vw;
+            }
+            .barber-card {
+                padding: 2.5vh 1.5vw;
+                min-height: 240px;
+            }
+            .barber-avatar { width: 9vh; height: 9vh; font-size: 4.5vh; min-width: 70px; min-height: 70px; }
+            .barber-name { font-size: 2.8vh; }
+            .stat-number { font-size: 3.8vh; }
+            .stat-label { font-size: 1.5vh; }
+            .queue-badge { font-size: 2vh; padding: 0.3vh 0.8vw; }
+            .time-row { font-size: 3.2vh; }
+            .brand-text h1 { font-size: 3.2vh; }
+            .stats-row .stat-number { font-size: 3.6vh; }
+            .stat-card .stat-icon { width: 6vh; height: 6vh; font-size: 2.8vh; }
+        }
+
+        /* شاشات كبيرة (لابتوب، ديسكتوب) */
+        @media (min-width: 1025px) and (max-width: 1919px) {
+            .barbers-grid {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 1.2vw;
+            }
+        }
+
+        /* شاشات متوسطة (تابلت) */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .barbers-grid {
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+                gap: 1.5vw;
+            }
+            .barber-card { min-height: 160px; padding: 1.8vh 1.5vw; }
+            .barber-avatar { width: 6vh; height: 6vh; font-size: 3vh; min-width: 50px; min-height: 50px; }
+            .barber-name { font-size: 2vh; }
+            .stat-number { font-size: 2.6vh; }
+            .queue-badge { font-size: 1.4vh; padding: 0.2vh 1vw; }
+            .time-row { font-size: 2.2vh; }
+            .header { padding: 1.2vh 2.5vw; }
+            .stats-row { gap: 1.2vw; }
+        }
+
+        /* شاشات صغيرة (هواتف) */
+        @media (max-width: 768px) {
+            body { padding: 1vh 1.5vw; }
+            .dashboard { gap: 1vh; height: 100vh; height: 100dvh; }
+            .header {
+                flex-wrap: wrap;
+                min-height: 55px;
+                padding: 0.8vh 3vw;
+                border-radius: 14px;
+            }
+            .brand { gap: 2vw; }
+            .logo { width: 4.5vh; height: 4.5vh; min-width: 38px; min-height: 38px; font-size: 2vh; }
+            .brand-text h1 { font-size: 2vh; }
+            .brand-text span { font-size: 1.1vh; }
+            .datetime { align-items: center; }
+            .time-row { font-size: 2vh; gap: 0.8vw; }
+            .time-row i { font-size: 1.6vh; }
+            .time-row .ampm { font-size: 1.4vh; }
+            .date-row { font-size: 1.1vh; }
+            .work-hours-display { font-size: 1.1vh; padding: 0.3vh 2vw; }
+
+            .barbers-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                gap: 1vw;
+                flex: 1;
+            }
+            .barber-card {
+                padding: 1.5vh 2vw;
+                min-height: 140px;
+                border-radius: 14px;
+            }
+            .barber-avatar {
+                width: 5.5vh;
+                height: 5.5vh;
+                min-width: 40px;
+                min-height: 40px;
+                font-size: 2.8vh;
+            }
+            .barber-name { font-size: 1.8vh; }
+            .barber-status { font-size: 1.1vh; gap: 0.8vw; }
+            .dot-online, .dot-offline { width: 1vh; height: 1vh; }
+            .barber-stats { gap: 2vw; }
+            .stat-number { font-size: 2.4vh; }
+            .stat-label { font-size: 1vh; }
+            .barber-queue { gap: 0.6vw; margin-top: 0.6vh; }
+            .queue-badge { font-size: 1.3vh; padding: 0.1vh 1.2vw; }
+            .barber-empty { font-size: 1vh; }
+
+            .stats-row {
+                grid-template-columns: 1fr 1fr;
+                gap: 0.8vw;
+            }
+            .stat-card {
+                padding: 1vh 2vw;
+                border-radius: 12px;
+            }
+            .stat-card .stat-number { font-size: 2.2vh; }
+            .stat-card .stat-label { font-size: 1.1vh; }
+            .stat-card .stat-icon {
+                width: 4vh;
+                height: 4vh;
+                font-size: 1.8vh;
+                min-width: 30px;
+                min-height: 30px;
+            }
+            .footer { font-size: 1vh; }
+        }
+
+        /* هواتف صغيرة جداً */
+        @media (max-width: 480px) {
+            .barbers-grid {
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+                gap: 0.8vw;
+            }
+            .barber-card {
+                padding: 1vh 1.5vw;
+                min-height: 110px;
+                border-radius: 12px;
+            }
+            .barber-avatar {
+                width: 4.5vh;
+                height: 4.5vh;
+                min-width: 32px;
+                min-height: 32px;
+                font-size: 2.2vh;
+                margin-bottom: 0.6vh;
+            }
+            .barber-name { font-size: 1.5vh; }
+            .barber-status { font-size: 0.9vh; gap: 0.5vw; margin-bottom: 0.6vh; }
+            .dot-online, .dot-offline { width: 0.8vh; height: 0.8vh; }
+            .barber-stats { gap: 1.5vw; }
+            .stat-number { font-size: 2vh; }
+            .stat-label { font-size: 0.9vh; }
+            .barber-queue { gap: 0.4vw; margin-top: 0.4vh; }
+            .queue-badge { font-size: 1.1vh; padding: 0.1vh 1vw; }
+            .barber-empty { font-size: 0.9vh; }
+
+            .stats-row {
+                grid-template-columns: 1fr 1fr;
+                gap: 0.5vw;
+            }
+            .stat-card {
+                padding: 0.8vh 1.5vw;
+                border-radius: 10px;
+            }
+            .stat-card .stat-number { font-size: 1.8vh; }
+            .stat-card .stat-label { font-size: 0.9vh; }
+            .stat-card .stat-icon {
+                width: 3.5vh;
+                height: 3.5vh;
+                font-size: 1.5vh;
+                min-width: 25px;
+                min-height: 25px;
+            }
+            .header { min-height: 45px; padding: 0.6vh 3vw; }
+            .logo { width: 3.5vh; height: 3.5vh; min-width: 30px; min-height: 30px; font-size: 1.6vh; }
+            .brand-text h1 { font-size: 1.6vh; }
+            .brand-text span { font-size: 0.9vh; }
+            .time-row { font-size: 1.6vh; }
+            .time-row i { font-size: 1.3vh; }
+            .time-row .ampm { font-size: 1.2vh; }
+            .date-row { font-size: 0.9vh; }
+            .work-hours-display { font-size: 0.9vh; padding: 0.2vh 2vw; }
+            .footer { font-size: 0.8vh; }
+        }
+
+        /* هواتف صغيرة جداً (أقل من 360px) */
+        @media (max-width: 360px) {
+            .barbers-grid {
+                grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+                gap: 0.5vw;
+            }
+            .barber-card { min-height: 90px; padding: 0.8vh 1vw; }
+            .barber-avatar { width: 3.5vh; height: 3.5vh; min-width: 26px; min-height: 26px; font-size: 1.8vh; }
+            .barber-name { font-size: 1.2vh; }
+            .stat-number { font-size: 1.6vh; }
+            .stat-label { font-size: 0.7vh; }
+            .queue-badge { font-size: 1vh; padding: 0.1vh 0.8vw; }
+            .barber-status { font-size: 0.8vh; }
+        }
+
+        /* شاشات عريضة (أفقي) */
+        @media (orientation: landscape) and (max-height: 600px) {
+            .header { min-height: 40px; padding: 0.6vh 2vw; }
+            .logo { width: 3.5vh; height: 3.5vh; min-width: 30px; min-height: 30px; font-size: 1.6vh; }
+            .brand-text h1 { font-size: 1.8vh; }
+            .brand-text span { font-size: 1vh; }
+            .time-row { font-size: 1.8vh; }
+            .date-row { font-size: 1vh; }
+            .work-hours-display { font-size: 1vh; padding: 0.2vh 1vw; }
+            .barbers-grid {
+                grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+                gap: 0.8vw;
+            }
+            .barber-card { min-height: 100px; padding: 1vh 1vw; }
+            .barber-avatar { width: 4vh; height: 4vh; min-width: 30px; min-height: 30px; font-size: 2vh; }
+            .barber-name { font-size: 1.5vh; }
+            .stat-number { font-size: 2vh; }
+            .stat-label { font-size: 0.9vh; }
+            .queue-badge { font-size: 1.1vh; padding: 0.1vh 0.6vw; }
+            .stats-row .stat-number { font-size: 2vh; }
+            .stat-card .stat-icon { width: 3.5vh; height: 3.5vh; font-size: 1.6vh; }
+            .footer { font-size: 0.9vh; }
+        }
+
+        /* شاشات عريضة جداً (TV أفقي) */
+        @media (orientation: landscape) and (min-height: 800px) and (min-width: 1200px) {
+            .barbers-grid {
+                grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+                gap: 1.5vw;
+            }
+            .barber-card { min-height: 200px; padding: 2vh 1.5vw; }
+            .barber-avatar { width: 8vh; height: 8vh; font-size: 4vh; min-width: 60px; min-height: 60px; }
+            .barber-name { font-size: 2.6vh; }
+            .stat-number { font-size: 3.4vh; }
+            .stat-label { font-size: 1.4vh; }
+            .queue-badge { font-size: 1.8vh; padding: 0.2vh 0.8vw; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="dashboard">
+
+    <!-- HEADER -->
+    <header class="header">
+        <div class="brand">
+            <div class="logo"><i class="fas fa-cut"></i></div>
+            <div class="brand-text">
+                <h1>صالوني</h1>
+                <span>شاشة العرض · لحظي</span>
+            </div>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:1vw; flex-wrap:wrap;">
+            <div class="work-hours-display">
+                <i class="fas fa-clock"></i>
+                <span>أوقات العمل: </span>
+                <span class="hours-value" id="workHoursDisplay">09:00 - 17:00</span>
+            </div>
+            <div class="datetime">
+                <div class="time-row" dir="ltr">
+                    <i class="fa-regular fa-clock"></i>
+                    <span id="currentTime">--:--:--</span>
+                    <span class="ampm" id="ampmLabel">ص</span>
+                </div>
+                <div class="date-row">
+                    <i class="fa-regular fa-calendar"></i>
+                    <span id="currentDate">--</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- BARBERS GRID -->
+    <div class="barbers-grid" id="barbersGrid">
+        <div style="grid-column: 1/-1; text-align: center; padding: 2vh; color: #666;">
+            <i class="fas fa-spinner fa-spin"></i> جاري تحميل الحلاقين...
+        </div>
+    </div>
+
+    <!-- STATS ROW -->
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-info">
+                <span class="stat-label">إجمالي الحجوزات اليوم</span>
+                <span class="stat-number" id="totalToday">0</span>
+            </div>
+            <div class="stat-icon icon-gold"><i class="fa-regular fa-calendar-check"></i></div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-info">
+                <span class="stat-label">قيد الخدمة الآن</span>
+                <span class="stat-number" id="inProgressCount">0</span>
+            </div>
+            <div class="stat-icon icon-blue"><i class="fas fa-cut"></i></div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-info">
+                <span class="stat-label">في الانتظار</span>
+                <span class="stat-number" id="waitingCount">0</span>
+            </div>
+            <div class="stat-icon icon-green"><i class="fas fa-user-friends"></i></div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+        <i class="fa-regular fa-heart"></i> شكرًا لثقتكم · نتمنى لكم تجربة مميزة
+    </div>
+
+</div>
+
+<script>
+    // ==============================================================
+    // DISPLAY.JS - VERSION 4.1 (BARBER-FOCUSED + REAL-TIME + SETTINGS)
+    // ==============================================================
+
+    const barbersGrid = document.getElementById('barbersGrid');
+    const totalTodayEl = document.getElementById('totalToday');
+    const inProgressCountEl = document.getElementById('inProgressCount');
+    const waitingCountEl = document.getElementById('waitingCount');
+
+    let isGistConfigured = false;
+    let allBarbers = [];
+    let allAppointments = [];
+    let workSchedule = { startTime: '09:00', endTime: '17:00' };
+    let today = new Date().toISOString().split('T')[0];
+    const SERVICE_DURATION = 30;
+
+    // ===== CLOCK =====
+    function updateClock() {
+        const now = new Date();
+        const h = String(now.getHours() % 12 || 12).padStart(2, '0');
+        const m = String(now.getMinutes()).padStart(2, '0');
+        const s = String(now.getSeconds()).padStart(2, '0');
+        const ampm = now.getHours() >= 12 ? 'م' : 'ص';
+        document.getElementById('currentTime').textContent = `${h}:${m}:${s}`;
+        document.getElementById('ampmLabel').textContent = ampm;
+
+        const days = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+        const months = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+        document.getElementById('currentDate').textContent = `${days[now.getDay()]} . ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    // ===== UPDATE WORK HOURS DISPLAY =====
+    function updateWorkHoursDisplay() {
+        const display = document.getElementById('workHoursDisplay');
+        if (!display) return;
+        const start = workSchedule.startTime || '09:00';
+        const end = workSchedule.endTime || '17:00';
+        display.textContent = `${start} - ${end}`;
+        // إضافة ملاحظة إذا كانت النهاية أقل من البداية (تمتد لليوم التالي)
+        const [sH, sM] = start.split(':').map(Number);
+        const [eH, eM] = end.split(':').map(Number);
+        const startMinutes = sH * 60 + sM;
+        let endMinutes = eH * 60 + eM;
+        if (endMinutes < startMinutes) {
+            display.textContent += ' (يمتد لليوم التالي)';
+        }
+    }
+
+    // ===== RENDER BARBERS =====
+    function renderBarbers() {
+        const activeBarbers = allBarbers.filter(b => b.active !== false);
+        if (activeBarbers.length === 0) {
+            barbersGrid.innerHTML = `
+                <div style="grid-column: 1/-1; text-align: center; padding: 4vh 2vw; color: #666;">
+                    <i class="fas fa-user-slash" style="font-size: 5vh; display: block; margin-bottom: 1vh;"></i>
+                    لا يوجد حلاقون نشطون حالياً
+                </div>
+            `;
+            return;
+        }
+
+        // إحصائيات اليوم
+        const todayAppointments = allAppointments.filter(a => a.date === today);
+        const totalToday = todayAppointments.length;
+        const inProgress = todayAppointments.filter(a => a.status === 'in_progress').length;
+        const waiting = todayAppointments.filter(a => a.status === 'pending' || a.status === 'pending_approval').length;
+
+        totalTodayEl.textContent = totalToday;
+        inProgressCountEl.textContent = inProgress;
+        waitingCountEl.textContent = waiting;
+
+        // بناء بطاقات الحلاقين
+        let html = '';
+        activeBarbers.forEach(barber => {
+            const barberAppointments = todayAppointments.filter(a =>
+                a.staff_id === barber.id &&
+                (a.status === 'pending' || a.status === 'pending_approval' || a.status === 'in_progress')
+            );
+
+            const count = barberAppointments.length;
+            const totalTime = count * SERVICE_DURATION;
+            const sorted = [...barberAppointments].sort((a, b) => (a.queue_number || 0) - (b.queue_number || 0));
+            const displayNumbers = sorted.slice(0, 5).map(a => `#${a.queue_number}`);
+
+            const hasInProgress = sorted.some(a => a.status === 'in_progress');
+            const statusText = hasInProgress ? 'قيد الخدمة' : (count > 0 ? 'في انتظار' : 'متفرغ');
+            const statusClass = hasInProgress ? 'dot-online' : (count > 0 ? 'dot-online' : 'dot-offline');
+
+            html += `
+                <div class="barber-card">
+                    <div class="barber-avatar"><i class="fas fa-user"></i></div>
+                    <div class="barber-name">${barber.name_ar || barber.name}</div>
+                    <div class="barber-status">
+                        <span class="${statusClass}"></span>
+                        <span>${statusText}</span>
+                    </div>
+                    <div class="barber-stats">
+                        <div class="stat-item">
+                            <div class="stat-number">${count}</div>
+                            <div class="stat-label">حجوزات</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">${totalTime}</div>
+                            <div class="stat-label">دقيقة</div>
+                        </div>
+                    </div>
+                    <div class="barber-queue">
+                        ${displayNumbers.length > 0 
+                            ? displayNumbers.map(n => `<span class="queue-badge ${n === displayNumbers[0] ? 'active' : ''}"><span class="hash">#</span>${n.replace('#', '')}</span>`).join('')
+                            : '<span class="barber-empty">لا توجد حجوزات</span>'
+                        }
+                        ${sorted.length > 5 ? `<span class="queue-badge">+${sorted.length - 5}</span>` : ''}
+                    </div>
+                </div>
+            `;
+        });
+
+        barbersGrid.innerHTML = html;
+    }
+
+    // ===== LOAD DATA =====
+    async function loadDisplayData() {
+        if (!isGistConfigured) {
+            const connected = await db.init();
+            if (connected) {
+                isGistConfigured = true;
+                console.log('✅ Display: Supabase connected');
+                // تسجيل المستمعين
+                setupRealtime();
+                // تحميل البيانات
+                const cache = db.getCache();
+                allBarbers = cache.staff || [];
+                allAppointments = cache.appointments || [];
+                const settings = cache.settings || {};
+                workSchedule = {
+                    startTime: settings.workStart || '09:00',
+                    endTime: settings.workEnd || '17:00'
+                };
+                updateWorkHoursDisplay();
+                renderBarbers();
+                console.log('🔄 Display: Data loaded at', new Date().toISOString());
+            } else {
+                barbersGrid.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 2vh; color: #666;">
+                        <i class="fas fa-cog fa-spin"></i> جاري الاتصال بقاعدة البيانات...
+                    </div>
+                `;
+                setTimeout(loadDisplayData, 2000);
+                return;
+            }
+        } else {
+            // تحديث من الكاش
+            const cache = db.getCache();
+            allBarbers = cache.staff || [];
+            allAppointments = cache.appointments || [];
+            const settings = cache.settings || {};
+            workSchedule = {
+                startTime: settings.workStart || '09:00',
+                endTime: settings.workEnd || '17:00'
+            };
+            updateWorkHoursDisplay();
+            renderBarbers();
+        }
+    }
+
+    // ===== SETUP REALTIME =====
+    function setupRealtime() {
+        // الاستماع لتغييرات الحجوزات
+        db.on('appointments', () => {
+            allAppointments = db.getCache().appointments || [];
+            renderBarbers();
+            console.log('🔄 Display: appointments updated');
+        });
+
+        // الاستماع لتغييرات الحلاقين
+        db.on('staff', () => {
+            allBarbers = db.getCache().staff || [];
+            renderBarbers();
+            console.log('🔄 Display: staff updated');
+        });
+
+        // الاستماع لتغييرات الإعدادات (ساعات العمل)
+        db.on('settings', () => {
+            const settings = db.getCache().settings || {};
+            workSchedule = {
+                startTime: settings.workStart || '09:00',
+                endTime: settings.workEnd || '17:00'
+            };
+            updateWorkHoursDisplay();
+            console.log('🔄 Display: settings updated');
+        });
+
+        console.log('✅ Display: Realtime listeners registered');
+    }
+
+    // ===== INIT =====
+    function init() {
+        loadDisplayData();
+
+        // تحديث عند العودة للصفحة
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && isGistConfigured) {
+                loadDisplayData();
+            }
+        });
+    }
+
+    init();
+</script>
+</body>
+</html>
