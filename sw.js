@@ -1,16 +1,16 @@
 // ==============================================================
-//  sw.js - Service Worker للتطبيق
-//  - يدعم التحديث الفوري عبر Cache API
-//  - يخزن الملفات الأساسية للعمل دون اتصال
-//  - يستمع لأحداث push (لإشعارات لاحقة)
+//  SERVICE WORKER - صالوني
+//  الإصدار 2.0 - يدعم التخزين المؤقت للملفات الأساسية
 // ==============================================================
 
-const CACHE_NAME = 'saloni-v3';
-const ASSETS = [
+const CACHE_NAME = 'saloni-cache-v2';
+const OFFLINE_URL = '/';
+
+// الملفات الأساسية التي سيتم تخزينها مؤقتاً (بدون display.html)
+const FILES_TO_CACHE = [
   '/',
   '/index.html',
   '/admin.html',
-  '/display.html',
   '/supabase-client.js',
   '/manifest.json',
   '/icon-72.png',
@@ -23,99 +23,62 @@ const ASSETS = [
   '/icon-512.png'
 ];
 
-// ===== تثبيت SW =====
+// تثبيت الـ Service Worker وتخزين الملفات
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        console.log('✅ Service Worker: Caching assets');
-        return cache.addAll(ASSETS);
+        console.log('📦 Service Worker: Caching files');
+        return cache.addAll(FILES_TO_CACHE);
       })
       .then(() => self.skipWaiting())
   );
 });
 
-// ===== تنشيط SW =====
+// تفعيل الـ Service Worker وحذف الكاش القديم
 self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys().then(keys => {
-      return Promise.all(
-        keys.filter(key => key !== CACHE_NAME)
-          .map(key => caches.delete(key))
-      );
-    }).then(() => self.clients.claim())
+    caches.keys().then(keyList => {
+      return Promise.all(keyList.map(key => {
+        if (key !== CACHE_NAME) {
+          console.log('🗑 Service Worker: Removing old cache', key);
+          return caches.delete(key);
+        }
+      }));
+    })
+    .then(() => self.clients.claim())
   );
 });
 
-// ===== استراتيجية Cache First مع تحديث الخلفية =====
+// اعتراض الطلبات وتقديم الملفات المخزنة مؤقتاً
 self.addEventListener('fetch', event => {
-  // تجاهل طلبات Supabase (API) لمنع التخزين المؤقت للبيانات الحساسة
-  if (event.request.url.includes('supabase.co')) {
-    event.respondWith(fetch(event.request));
+  // تجاهل طلبات Supabase (API) وملفات خارجية
+  if (event.request.url.includes('supabase.co') ||
+      event.request.url.includes('googleapis.com') ||
+      event.request.url.includes('cdn.jsdelivr.net')) {
     return;
   }
 
   event.respondWith(
     caches.match(event.request)
-      .then(cached => {
-        if (cached) {
-          // تحديث الخلفية
-          fetch(event.request).then(response => {
-            if (response && response.status === 200) {
-              caches.open(CACHE_NAME).then(cache => {
-                cache.put(event.request, response.clone());
-              });
-            }
-          }).catch(() => {});
-          return cached;
-        }
-        return fetch(event.request).then(response => {
-          // تخزين الملف الجديد في الكاش
-          if (response && response.status === 200) {
-            caches.open(CACHE_NAME).then(cache => {
-              cache.put(event.request, response.clone());
-            });
-          }
+      .then(response => {
+        if (response) {
           return response;
-        }).catch(() => {
-          // عرض صفحة الخطأ في حال عدم الاتصال
-          return new Response('⚠️ لا يوجد اتصال بالإنترنت', { status: 503 });
+        }
+        // إذا لم يكن الملف في الكاش، حمله من الشبكة
+        return fetch(event.request).catch(() => {
+          // إذا كان الطلب لصفحة HTML، عرض صفحة غير متصل
+          if (event.request.headers.get('accept').includes('text/html')) {
+            return caches.match(OFFLINE_URL);
+          }
         });
       })
   );
 });
 
-// ===== استقبال إشعارات push =====
-self.addEventListener('push', event => {
-  const data = event.data ? event.data.json() : {};
-  const title = data.title || 'صالوني';
-  const options = {
-    body: data.body || 'هناك تحديث جديد في حجزك',
-    icon: '/icon-192.png',
-    badge: '/icon-96.png',
-    vibrate: [200, 100, 200],
-    data: data.url || '/'
-  };
-  event.waitUntil(
-    self.registration.showNotification(title, options)
-  );
-});
-
-// ===== التعامل مع ضغط الإشعار =====
-self.addEventListener('notificationclick', event => {
-  event.notification.close();
-  const url = event.notification.data || '/';
-  event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true })
-      .then(windowClients => {
-        for (let client of windowClients) {
-          if (client.url === url && 'focus' in client) {
-            return client.focus();
-          }
-        }
-        if (clients.openWindow) {
-          return clients.openWindow(url);
-        }
-      })
-  );
+// تحديث الكاش في الخلفية (عند الاتصال)
+self.addEventListener('message', event => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
