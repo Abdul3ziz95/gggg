@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5" />
     <meta name="theme-color" content="#0D0D0D" />
     <title id="pageTitle">صالوني | حجز متقدم</title>
-    <link rel="manifest" href="manifest.json" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet" />
@@ -2131,14 +2130,15 @@
     </div>
 
     <!-- ============================================================ -->
-    <!--  CLIENT.JS - VERSION 4.1 (REAL-TIME + 24H + EXTENDED) -->
+    <!--  CLIENT.JS - VERSION 4.0 (REAL-TIME + EXTENDED HOURS + ACCURATE TRANSLATION) -->
     <!-- ============================================================ -->
     <script>
         // ==============================================================
-        //  CLIENT.JS - VERSION 4.1
-        //  - دعم 24 ساعة والامتداد لليوم التالي
-        //  - تزامن فوري عبر Realtime + BroadcastChannel + Polling (3 ثوان)
-        //  - تحسين دقة حساب عدد الأشخاص قبلك
+        //  CLIENT.JS - VERSION 4.0
+        //  - تحديث فوري عبر Supabase Realtime + BroadcastChannel
+        //  - ترجمة دقيقة للخدمات (name_ar, name_en, name_ur)
+        //  - دعم الدوام الممتد لليوم التالي (أي وقت من 1 إلى 24 ساعة)
+        //  - حساب دقيق لعدد الحجوزات القبلك في صفحة "مكاني"
         // ==============================================================
 
         // ===== STATE =====
@@ -2166,7 +2166,7 @@
         // ===== DOM REFS =====
         const $ = id => document.getElementById(id);
 
-        // ===== TRANSLATIONS ===== (مختصرة، نفس المحتوى السابق)
+        // ===== TRANSLATIONS =====
         const translations = {
             ar: {
                 appTitle: 'صالوني', splashTitle: 'صالوني', splashSub: 'نظام الحجوزات الذكي',
@@ -2311,13 +2311,19 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // ===== SOUND SYSTEM =====
+        // ==============================================================
+        //  SOUND SYSTEM (Web Audio API)
+        // ==============================================================
+
         let audioCtx = null;
+
         function getAudioContext() {
             if (!audioCtx) {
                 try {
                     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                } catch (e) { console.warn('Web Audio API not supported'); }
+                } catch (e) {
+                    console.warn('Web Audio API not supported');
+                }
             }
             return audioCtx;
         }
@@ -2336,7 +2342,9 @@
                 gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + duration / 1000);
                 oscillator.start();
                 oscillator.stop(ctx.currentTime + duration / 1000);
-            } catch (e) { console.error('Audio error:', e); }
+            } catch (e) {
+                console.error('Audio error:', e);
+            }
         }
 
         function playNotificationSound() {
@@ -2362,7 +2370,10 @@
             setTimeout(() => playBeep(1400, 300, 'sine', 0.2), 400);
         }
 
-        // ===== LANGUAGE UI =====
+        // ==============================================================
+        //  LANGUAGE UI
+        // ==============================================================
+
         window.toggleLangDropdown = function() {
             document.getElementById('langDropdown').classList.toggle('open');
             document.getElementById('langToggle').classList.toggle('open');
@@ -2386,14 +2397,17 @@
         function applyTranslations() {
             const t = translations[currentLanguage];
             if (!t) return;
+
             document.documentElement.lang = currentLanguage;
             document.documentElement.dir = currentLanguage === 'ar' || currentLanguage === 'ur' ? 'rtl' : 'ltr';
             document.getElementById('htmlRoot').lang = currentLanguage;
             document.getElementById('htmlRoot').dir = currentLanguage === 'ar' || currentLanguage === 'ur' ? 'rtl' : 'ltr';
+
             document.getElementById('pageTitle').textContent = t.appTitle + ' | ' + (currentLanguage === 'en' ? 'Advanced Booking' : currentLanguage === 'ur' ? 'جدید بکنگ' : 'حجز متقدم');
             document.getElementById('splashTitle').textContent = t.splashTitle;
             document.getElementById('splashSub').textContent = t.splashSub;
             document.getElementById('appTitle').textContent = t.appTitle;
+
             document.getElementById('step1Label').textContent = t.step1;
             document.getElementById('step2Label').textContent = t.step2;
             document.getElementById('servicesTitle').textContent = t.servicesTitle;
@@ -2427,13 +2441,16 @@
             document.getElementById('noBookingDesc').textContent = t.noBookingDesc;
             document.getElementById('newBookingBtn2').textContent = t.newBookingBtn;
             document.getElementById('notifBtn').textContent = t.confirmBooking || 'حسناً';
+
             const flags = { ar: '🇸🇦', en: '🇬🇧', ur: '🇵🇰' };
             const labels = { ar: 'العربية', en: 'English', ur: 'اردو' };
             document.getElementById('currentFlag').textContent = flags[currentLanguage] || '🇸🇦';
             document.getElementById('currentLangLabel').textContent = labels[currentLanguage] || 'العربية';
+
             document.querySelectorAll('.lang-option').forEach(opt => {
                 opt.classList.toggle('active', opt.dataset.lang === currentLanguage);
             });
+
             renderServices();
             if (document.getElementById('stepStaff').classList.contains('active')) {
                 loadStaffWithCounts();
@@ -2466,33 +2483,24 @@
             document.getElementById('finalDuration').textContent = BOOKING_DURATION + ' ' + (t.minutes || 'دقيقة');
         }
 
-        // ===== TIME INFO WITH EXTENDED HOURS & 24H SUPPORT =====
+        // ===== TIME INFO WITH EXTENDED HOURS SUPPORT =====
         function updateTimeInfo() {
             const now = new Date();
             const currentTime = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
             const start = workSchedule.startTime || '09:00';
             const end = workSchedule.endTime || '17:00';
             let displayEnd = end;
-            let is24h = false;
-
-            if (start === '00:00' && end === '00:00') {
-                displayEnd = '24 ساعة';
-                is24h = true;
-            } else {
-                const [sH, sM] = start.split(':').map(Number);
-                const [eH, eM] = end.split(':').map(Number);
-                let endMinutes = eH * 60 + eM;
-                let startMinutes = sH * 60 + sM;
-                if (endMinutes < startMinutes) {
-                    const t = translations[currentLanguage];
-                    const extendsNote = t.extendsNextDay || '(يمتد لليوم التالي)';
-                    displayEnd = end + ' ' + extendsNote;
-                }
+            const [sH, sM] = start.split(':').map(Number);
+            const [eH, eM] = end.split(':').map(Number);
+            let endMinutes = eH * 60 + eM;
+            let startMinutes = sH * 60 + sM;
+            if (endMinutes < startMinutes) {
+                const t = translations[currentLanguage];
+                const extendsNote = t.extendsNextDay || '(يمتد لليوم التالي)';
+                displayEnd = end + ' ' + extendsNote;
             }
-
-            document.getElementById('workHoursDisplay').textContent = is24h ? '24 ساعة' : start + ' - ' + displayEnd;
+            document.getElementById('workHoursDisplay').textContent = start + ' - ' + displayEnd;
             document.getElementById('currentTimeDisplay').textContent = currentTime;
-
             const isWithin = isWithinWorkHours();
             const statusDisplay = document.getElementById('statusTimeDisplay');
             const t = translations[currentLanguage];
@@ -2505,7 +2513,10 @@
             }
         }
 
-        // ===== WORK HOURS CHECK (EXTENDED & 24H) =====
+        // ==============================================================
+        //  WORK HOURS CHECK (EXTENDED)
+        // ==============================================================
+
         function isWithinWorkHours() {
             const now = new Date();
             const currentMinutes = now.getHours() * 60 + now.getMinutes();
@@ -2513,17 +2524,9 @@
             const [eH, eM] = (workSchedule.endTime || '17:00').split(':').map(Number);
             const startMinutes = sH * 60 + sM;
             let endMinutes = eH * 60 + eM;
-
-            // حالة 24 ساعة
-            if (startMinutes === 0 && endMinutes === 0) {
-                return true; // جميع الأوقات مسموحة
-            }
-
-            // إذا كانت النهاية أقل من البداية، نضيف 24 ساعة
             if (endMinutes < startMinutes) {
                 endMinutes += 24 * 60;
             }
-
             const serviceEndMinutes = currentMinutes + BOOKING_DURATION;
             return currentMinutes >= startMinutes && serviceEndMinutes <= endMinutes;
         }
@@ -2847,7 +2850,10 @@
             }
         }
 
-        // ===== LOAD DATA FROM SUPABASE =====
+        // ==============================================================
+        //  LOAD DATA FROM SUPABASE
+        // ==============================================================
+
         async function loadAllData() {
             if (!isGistConfigured) return;
             try {
@@ -2879,7 +2885,10 @@
             }
         }
 
-        // ===== SUPABASE CONNECTION + REALTIME =====
+        // ==============================================================
+        //  SUPABASE CONNECTION + REALTIME
+        // ==============================================================
+
         let reconnectAttempts = 0;
         const MAX_RECONNECT_ATTEMPTS = 20;
 
@@ -2890,6 +2899,7 @@
                     reconnectAttempts = 0;
                     console.log('✅ Supabase connected');
                     loadAllData();
+                    // تسجيل المستمعين للتحديث الفوري
                     db.on('appointments', async (payload, appointments) => {
                         if (_updateLock) return;
                         _updateLock = true;
@@ -2946,7 +2956,10 @@
             });
         }
 
-        // ===== REFRESH MY APPOINTMENTS =====
+        // ==============================================================
+        //  REFRESH MY APPOINTMENTS (مع الأصوات عند تغير الحالة)
+        // ==============================================================
+
         async function refreshMyAppointments(force = false) {
             if (!isGistConfigured || !userId) return;
             try {
@@ -3007,7 +3020,10 @@
             }
         }
 
-        // ===== CONFIRM BOOKING =====
+        // ==============================================================
+        //  CONFIRM BOOKING
+        // ==============================================================
+
         window.confirmBooking = async function() {
             const t = translations[currentLanguage];
             if (selectedServices.length === 0) {
@@ -3102,7 +3118,10 @@
             }
         };
 
-        // ===== RESET BOOKING =====
+        // ==============================================================
+        //  RESET BOOKING
+        // ==============================================================
+
         window.resetBooking = function() {
             const t = translations[currentLanguage];
             activeQueueAppointment = null;
@@ -3117,7 +3136,10 @@
             showToast(t.toastReset || 'تم إعادة تعيين الحجز', 'info');
         };
 
-        // ===== QUEUE DISPLAY (مع حساب دقيق للعدد القبلك) =====
+        // ==============================================================
+        //  QUEUE DISPLAY (مع حساب دقيق للعدد القبلك)
+        // ==============================================================
+
         function updateQueueDisplay() {
             const container = document.getElementById('queueStatusContainer');
             const noBooking = document.getElementById('noActiveBooking');
@@ -3219,7 +3241,10 @@
             }
         }
 
-        // ===== BACKGROUND UPDATES =====
+        // ==============================================================
+        //  BACKGROUND UPDATES
+        // ==============================================================
+
         document.addEventListener('visibilitychange', () => {
             if (!document.hidden && isGistConfigured) {
                 console.log('🔄 Tab became visible - Refreshing data');
@@ -3236,7 +3261,10 @@
             }
         }, 30000);
 
-        // ===== INIT =====
+        // ==============================================================
+        //  INIT
+        // ==============================================================
+
         function init() {
             const savedLang = localStorage.getItem('preferred_language');
             if (savedLang && translations[savedLang]) {
@@ -3279,7 +3307,7 @@
         }
 
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js').catch(() => {});
+            navigator.serviceWorker.register('/gggg/service-worker.js').catch(() => {});
         }
 
         init();

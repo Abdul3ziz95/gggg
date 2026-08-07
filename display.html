@@ -4,9 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0">
     <title>صالوني - شاشة العرض</title>
-    <link rel="manifest" href="manifest.json" />
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-client.js"></script>
     <style>
@@ -152,15 +151,6 @@
         .work-hours-display .hours-value {
             color: var(--text-primary);
             font-weight: 600;
-        }
-        .work-hours-display .hours-extended {
-            color: var(--gold);
-            font-weight: 600;
-            font-size: 0.9em;
-        }
-        .work-hours-display .hours-24 {
-            color: var(--gold);
-            font-weight: 800;
         }
 
         /* ===== BARBERS GRID ===== */
@@ -700,7 +690,7 @@
 
 <script>
     // ==============================================================
-    // DISPLAY.JS - VERSION 4.2 (REAL-TIME + 24H + EXTENDED HOURS)
+    // DISPLAY.JS - VERSION 4.1 (BARBER-FOCUSED + REAL-TIME + SETTINGS)
     // ==============================================================
 
     const barbersGrid = document.getElementById('barbersGrid');
@@ -732,32 +722,21 @@
     updateClock();
     setInterval(updateClock, 1000);
 
-    // ===== UPDATE WORK HOURS DISPLAY (يدعم 24 ساعة والامتداد) =====
+    // ===== UPDATE WORK HOURS DISPLAY =====
     function updateWorkHoursDisplay() {
         const display = document.getElementById('workHoursDisplay');
         if (!display) return;
         const start = workSchedule.startTime || '09:00';
         const end = workSchedule.endTime || '17:00';
-
-        // حالة 24 ساعة
-        if (start === '00:00' && end === '00:00') {
-            display.innerHTML = `<span class="hours-24">⏰ 24 ساعة (جميع الأوقات متاحة)</span>`;
-            return;
-        }
-
+        display.textContent = `${start} - ${end}`;
+        // إضافة ملاحظة إذا كانت النهاية أقل من البداية (تمتد لليوم التالي)
         const [sH, sM] = start.split(':').map(Number);
         const [eH, eM] = end.split(':').map(Number);
         const startMinutes = sH * 60 + sM;
         let endMinutes = eH * 60 + eM;
-        let extra = '';
-        let extraClass = '';
-
         if (endMinutes < startMinutes) {
-            extra = ' (يمتد لليوم التالي)';
-            extraClass = 'hours-extended';
+            display.textContent += ' (يمتد لليوم التالي)';
         }
-
-        display.innerHTML = `${start} - ${end} <span class="${extraClass}">${extra}</span>`;
     }
 
     // ===== RENDER BARBERS =====
@@ -839,7 +818,9 @@
             if (connected) {
                 isGistConfigured = true;
                 console.log('✅ Display: Supabase connected');
+                // تسجيل المستمعين
                 setupRealtime();
+                // تحميل البيانات
                 const cache = db.getCache();
                 allBarbers = cache.staff || [];
                 allAppointments = cache.appointments || [];
@@ -861,6 +842,7 @@
                 return;
             }
         } else {
+            // تحديث من الكاش
             const cache = db.getCache();
             allBarbers = cache.staff || [];
             allAppointments = cache.appointments || [];
@@ -876,18 +858,21 @@
 
     // ===== SETUP REALTIME =====
     function setupRealtime() {
+        // الاستماع لتغييرات الحجوزات
         db.on('appointments', () => {
             allAppointments = db.getCache().appointments || [];
             renderBarbers();
             console.log('🔄 Display: appointments updated');
         });
 
+        // الاستماع لتغييرات الحلاقين
         db.on('staff', () => {
             allBarbers = db.getCache().staff || [];
             renderBarbers();
             console.log('🔄 Display: staff updated');
         });
 
+        // الاستماع لتغييرات الإعدادات (ساعات العمل)
         db.on('settings', () => {
             const settings = db.getCache().settings || {};
             workSchedule = {
@@ -905,25 +890,12 @@
     function init() {
         loadDisplayData();
 
+        // تحديث عند العودة للصفحة
         document.addEventListener('visibilitychange', () => {
             if (!document.hidden && isGistConfigured) {
                 loadDisplayData();
             }
         });
-
-        // تحديث عرض ساعات العمل كل 10 ثوانٍ للتأكد من التزامن
-        setInterval(() => {
-            if (isGistConfigured) {
-                const settings = db.getCache().settings || {};
-                if (settings.workStart !== workSchedule.startTime || settings.workEnd !== workSchedule.endTime) {
-                    workSchedule = {
-                        startTime: settings.workStart || '09:00',
-                        endTime: settings.workEnd || '17:00'
-                    };
-                    updateWorkHoursDisplay();
-                }
-            }
-        }, 10000);
     }
 
     init();

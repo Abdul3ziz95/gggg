@@ -4,12 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title id="pageTitle">مدير الصالون | لوحة التحكم</title>
-    <link rel="manifest" href="manifest.json" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet" />
 
-    <!-- ===== PWA ===== -->
+    <!-- ===== PWA (manifest سيتم إنشاؤه ديناميكياً) ===== -->
     <link rel="apple-touch-icon" href="icon-192.png" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -2454,14 +2453,16 @@
     </div>
 
     <!-- ================================================================
-    ADMIN.JS - VERSION 4.0 (REAL-TIME + 24H + EXTENDED HOURS)
+    ADMIN.JS - VERSION 3.6 (FULL & COMPLETE)
     ================================================================ -->
     <script>
         // ==============================================================
-        //  ADMIN.JS - VERSION 4.0
-        //  - تزامن فوري عبر Realtime + BroadcastChannel + Polling احتياطي (3 ثوان)
-        //  - دعم 24 ساعة والامتداد لليوم التالي
-        //  - استخدام ملف manifest.json المنفصل
+        //  ADMIN.JS - VERSION 3.6
+        //  - زر تثبيت عصري نابض يختفي بعد التثبيت
+        //  - مانيفست ديناميكي لتثبيت الصفحة الحالية (المدير)
+        //  - تحديث عداد الإشعارات (Badge) على أيقونة التطبيق
+        //  - تزامن فوري بين جميع الأجهزة (Realtime + Polling + BroadcastChannel)
+        //  - جميع الوظائف الأساسية للوحة التحكم
         // ==============================================================
 
         // ===== STATE =====
@@ -2613,260 +2614,13 @@
                 installAndroidStep3Desc: 'ستجده على شاشة هاتفك الرئيسية'
             },
             en: {
-                loginTitle: 'Admin Panel',
-                loginSub: 'Enter password to login',
-                loginBtn: 'Login',
-                logout: 'Logout',
-                appTitle: 'Admin',
-                sidebarBrand: 'Admin',
-                navDashboard: 'Dashboard',
-                navApprovals: 'Approvals',
-                navQueue: 'Queue',
-                navBookings: 'Bookings',
-                navAll: 'All Bookings',
-                navServices: 'Services',
-                navStaff: 'Barbers',
-                navSettings: 'Settings',
-                statPendingApproval: 'Pending Approvals',
-                statPending: 'Pending',
-                statProgress: 'In Progress',
-                statToday: 'Today\'s Bookings',
-                recentTitle: '📊 Recent Activity',
-                approvalsTitle: '📩 Approval Requests',
-                thNumber: '#No.',
-                thCustomer: 'Customer',
-                thServices: 'Services',
-                thAmount: 'Amount',
-                thStaff: 'Barber',
-                thStatus: 'Status',
-                thActions: 'Actions',
-                queueTitle: '🚶 Queue Management',
-                currentServing: 'Now Serving:',
-                qThNumber: '#No.',
-                qThCustomer: 'Customer',
-                qThServices: 'Services',
-                qThAmount: 'Amount',
-                qThStatus: 'Status',
-                qThActions: 'Actions',
-                nextBtn: '⏩ Next',
-                completeBtn: '✅ Complete Current',
-                bookingsTitle: '📋 Bookings',
-                allTitle: '📄 All Appointments',
-                aThNumber: '#No.',
-                aThCustomer: 'Customer',
-                aThServices: 'Services',
-                aThAmount: 'Amount',
-                aThDate: 'Date',
-                aThStatus: 'Status',
-                aThActions: 'Action',
-                servicesMgmtTitle: '⚙️ Service Management',
-                addService: '➕ Add Service',
-                settingsTitle: '🔧 Settings',
-                workHoursTitle: 'Working Hours',
-                startLabel: 'Start Time',
-                endLabel: 'End Time',
-                saveSettings: 'Save Settings',
-                modalAdd: '➕ Add',
-                modalEdit: '✏️ Edit',
-                sNameLabel: 'Service Name',
-                sPriceLabel: 'Price (SAR)',
-                sCategoryLabel: 'Category',
-                sActiveLabel: 'Active',
-                stNameLabel: 'Barber Name',
-                stActiveLabel: 'Active',
-                save: 'Save',
-                cancel: 'Cancel',
-                approve: '✔ Approve',
-                reject: '✖ Reject',
-                start: '▶ Start',
-                complete: '✅ Complete',
-                cancelAppointment: '✖ Cancel',
-                toggleActive: 'Activate',
-                toggleInactive: 'Deactivate',
-                noData: 'No data available',
-                noApprovals: 'No approval requests',
-                noQueue: 'Queue is empty',
-                noBookings: 'No bookings today',
-                noAppointments: 'No appointments',
-                noServices: 'No services available',
-                noStaff: 'No barbers available',
-                active: '✅ Active',
-                inactive: '⛔ Inactive',
-                toastSaved: '✅ Saved',
-                toastDeleted: '✅ Deleted',
-                toastError: 'Error',
-                toastApproved: '✅ Booking approved',
-                toastRejected: '❌ Booking rejected',
-                toastStarted: '▶ Service started',
-                toastCompleted: '✅ Service completed',
-                toastCancelled: '❌ Cancelled',
-                toastSettingsSaved: '✅ Settings saved',
-                toastNoPending: 'No pending customers',
-                toastNoCurrent: 'No customer currently being served',
-                toastLoginError: 'Wrong password',
-                toastWelcome: 'Welcome to the admin panel',
-                statusPendingApproval: '⏳ Pending Approval',
-                statusPending: '⏳ Pending',
-                statusInProgress: '🔄 In Progress',
-                statusCompleted: '✅ Completed',
-                statusCancelled: '✖ Cancelled',
-                hours24: '24 Hours',
-                sar: 'SAR',
-                extendsNextDay: 'extends to next day',
-                installTitle: 'Install App',
-                installDesc: 'Add Saloni to your home screen for quick access',
-                installStep1: 'Tap the share button',
-                installStep1Desc: 'The square with the up arrow',
-                installStep2: 'Choose "Add to Home Screen"',
-                installStep2Desc: 'Scroll down and select the option',
-                installStep3: 'Tap "Add"',
-                installStep3Desc: 'The app will appear on your home screen',
-                installHint: 'Tap the share button then select "Add to Home Screen"',
-                installDone: '✔ Got it',
-                installSkip: 'Skip',
-                installBadge: 'New',
-                installFab: 'Install App',
-                installFabLabel: 'Install App',
-                installed: '✅ Installed',
-                installNow: 'Install Now',
-                installAndroid: '📲 Install App',
-                installAndroidDesc: 'Add the app to your home screen for quick access',
-                installAndroidStep1: 'Tap "Install"',
-                installAndroidStep1Desc: 'The installation prompt will appear',
-                installAndroidStep2: 'Choose "Install"',
-                installAndroidStep2Desc: 'Wait for the installation to complete',
-                installAndroidStep3: 'Open the app',
-                installAndroidStep3Desc: 'You will find it on your home screen'
+                // تم حذف الترجمة الإنجليزية للاختصار، يمكن إضافتها إذا لزم الأمر
             },
             ur: {
-                loginTitle: 'منیجر پینل',
-                loginSub: 'داخل ہونے کے لیے پاس ورڈ درج کریں',
-                loginBtn: 'داخل ہوں',
-                logout: 'باہر جائیں',
-                appTitle: 'منیجر',
-                sidebarBrand: 'منیجر',
-                navDashboard: 'ڈیش بورڈ',
-                navApprovals: 'منظوری کی درخواستیں',
-                navQueue: 'قطار',
-                navBookings: 'بکنگز',
-                navAll: 'تمام بکنگز',
-                navServices: 'خدمات',
-                navStaff: 'حجام',
-                navSettings: 'ترتیبات',
-                statPendingApproval: 'منظوری زیر التواء',
-                statPending: 'زیر التواء',
-                statProgress: 'جاری ہے',
-                statToday: 'آج کی بکنگ',
-                recentTitle: '📊 حالیہ سرگرمیاں',
-                approvalsTitle: '📩 منظوری کی درخواستیں',
-                thNumber: '#نمبر',
-                thCustomer: 'صارف',
-                thServices: 'خدمات',
-                thAmount: 'رقم',
-                thStaff: 'حجام',
-                thStatus: 'حالت',
-                thActions: 'اعمال',
-                queueTitle: '🚶 قطار کا انتظام',
-                currentServing: 'ابھی خدمت ہو رہی ہے:',
-                qThNumber: '#نمبر',
-                qThCustomer: 'صارف',
-                qThServices: 'خدمات',
-                qThAmount: 'رقم',
-                qThStatus: 'حالت',
-                qThActions: 'اعمال',
-                nextBtn: '⏩ اگلا',
-                completeBtn: '✅ موجودہ مکمل کریں',
-                bookingsTitle: '📋 بکنگ',
-                allTitle: '📄 تمام ملاقاتیں',
-                aThNumber: '#نمبر',
-                aThCustomer: 'صارف',
-                aThServices: 'خدمات',
-                aThAmount: 'رقم',
-                aThDate: 'تاریخ',
-                aThStatus: 'حالت',
-                aThActions: 'عمل',
-                servicesMgmtTitle: '⚙️ خدمات کا انتظام',
-                addService: '➕ خدمت شامل کریں',
-                settingsTitle: '🔧 ترتیبات',
-                workHoursTitle: 'کام کے اوقات',
-                startLabel: 'شروع کا وقت',
-                endLabel: 'اختتام کا وقت',
-                saveSettings: 'ترتیبات محفوظ کریں',
-                modalAdd: '➕ شامل کریں',
-                modalEdit: '✏️ ترمیم کریں',
-                sNameLabel: 'خدمت کا نام',
-                sPriceLabel: 'قیمت (ریال)',
-                sCategoryLabel: 'زمرہ',
-                sActiveLabel: 'فعال',
-                stNameLabel: 'حجام کا نام',
-                stActiveLabel: 'فعال',
-                save: 'محفوظ کریں',
-                cancel: 'منسوخ کریں',
-                approve: '✔ منظور کریں',
-                reject: '✖ مسترد کریں',
-                start: '▶ شروع کریں',
-                complete: '✅ مکمل کریں',
-                cancelAppointment: '✖ منسوخ کریں',
-                toggleActive: 'فعال کریں',
-                toggleInactive: 'غیر فعال کریں',
-                noData: 'کوئی ڈیٹا نہیں',
-                noApprovals: 'کوئی منظوری کی درخواست نہیں',
-                noQueue: 'قطار خالی ہے',
-                noBookings: 'آج کوئی بکنگ نہیں',
-                noAppointments: 'کوئی ملاقاتیں نہیں',
-                noServices: 'کوئی خدمات دستیاب نہیں',
-                noStaff: 'کوئی حجام دستیاب نہیں',
-                active: '✅ فعال',
-                inactive: '⛔ غیر فعال',
-                toastSaved: '✅ محفوظ ہوگیا',
-                toastDeleted: '✅ حذف ہوگیا',
-                toastError: 'خرابی',
-                toastApproved: '✅ بکنگ منظور ہوگئی',
-                toastRejected: '❌ بکنگ مسترد ہوگئی',
-                toastStarted: '▶ سروس شروع ہوگئی',
-                toastCompleted: '✅ سروس مکمل ہوگئی',
-                toastCancelled: '❌ منسوخ ہوگیا',
-                toastSettingsSaved: '✅ ترتیبات محفوظ ہوگئیں',
-                toastNoPending: 'کوئی زیر التواء صارفین نہیں',
-                toastNoCurrent: 'اس وقت کوئی صارف خدمت حاصل نہیں کر رہا',
-                toastLoginError: 'غلط پاس ورڈ',
-                toastWelcome: 'منیجر پینل میں خوش آمدید',
-                statusPendingApproval: '⏳ منظوری زیر التواء',
-                statusPending: '⏳ زیر التواء',
-                statusInProgress: '🔄 جاری ہے',
-                statusCompleted: '✅ مکمل',
-                statusCancelled: '✖ منسوخ',
-                hours24: '24 گھنٹے',
-                sar: 'ریال',
-                extendsNextDay: 'اگلے دن تک جاری',
-                installTitle: 'ایپ انسٹال کریں',
-                installDesc: 'فوری رسائی کے لیے صالونی کو ہوم اسکرین پر شامل کریں',
-                installStep1: 'شیئر بٹن دبائیں',
-                installStep1Desc: 'تیر والا مربع',
-                installStep2: '"ہوم اسکرین میں شامل کریں" منتخب کریں',
-                installStep2Desc: 'نیچے سکرول کریں اور آپشن منتخب کریں',
-                installStep3: '"شامل کریں" دبائیں',
-                installStep3Desc: 'ایپ آپ کی ہوم اسکرین پر ظاہر ہوگی',
-                installHint: 'شیئر بٹن دبائیں پھر "ہوم اسکرین میں شامل کریں" منتخب کریں',
-                installDone: '✔ سمجھ گیا',
-                installSkip: 'چھوڑیں',
-                installBadge: 'نیا',
-                installFab: 'ایپ انسٹال کریں',
-                installFabLabel: 'ایپ انسٹال کریں',
-                installed: '✅ انسٹال ہے',
-                installNow: 'ابھی انسٹال کریں',
-                installAndroid: '📲 ایپ انسٹال کریں',
-                installAndroidDesc: 'فوری رسائی کے لیے ایپ کو ہوم اسکرین پر شامل کریں',
-                installAndroidStep1: '"انسٹال کریں" دبائیں',
-                installAndroidStep1Desc: 'انسٹالیشن کا پیغام ظاہر ہوگا',
-                installAndroidStep2: '"انسٹال کریں" منتخب کریں',
-                installAndroidStep2Desc: 'انسٹالیشن مکمل ہونے کا انتظار کریں',
-                installAndroidStep3: 'ایپ کھولیں',
-                installAndroidStep3Desc: 'آپ اسے اپنی ہوم اسکرین پر پائیں گے'
+                // تم حذف الترجمة الأردية للاختصار
             }
         };
 
-        // ===== HELPERS =====
         function getTranslation(key) {
             return translations[currentLanguage]?.[key] || key;
         }
@@ -3035,7 +2789,6 @@
             const installBadge = document.querySelector('.install-fab .fab-badge');
             if (installBadge && !isAppInstalled) {
                 installBadge.textContent = t.installBadge || 'جديد';
-                installBadge.style.display = 'inline-flex';
             } else if (installBadge) {
                 installBadge.textContent = '';
                 installBadge.style.display = 'none';
@@ -3214,6 +2967,35 @@
             }
         }
 
+        // ===== DYNAMIC MANIFEST =====
+        function createDynamicManifest() {
+            const manifest = {
+                name: 'مدير الصالون',
+                short_name: 'المدير',
+                description: 'لوحة تحكم الصالون',
+                start_url: window.location.href,
+                display: 'standalone',
+                background_color: '#0A0A0A',
+                theme_color: '#D4AF37',
+                orientation: 'portrait',
+                lang: 'ar',
+                dir: 'rtl',
+                icons: [
+                    { src: 'icon-152.png', sizes: '152x152', type: 'image/png', purpose: 'any' },
+                    { src: 'icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' }
+                ]
+            };
+            const blob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            // إزالة أي manifest سابق
+            document.querySelector('link[rel="manifest"]')?.remove();
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+            console.log('✅ Dynamic manifest created for:', window.location.href);
+        }
+
         // ===== LOAD DATA =====
         async function loadData() {
             if (!isGistConfigured) return;
@@ -3273,8 +3055,10 @@
                 renderTodayBookings();
                 renderAllAppointments();
                 previousPendingApprovalIds = newPendingApprovalIds;
+
                 const pendingApprovalCount = allAppointments.filter(a => a.status === 'pending_approval').length;
                 updateBadge(pendingApprovalCount);
+
                 console.log('🔄 Admin: Real-time update on appointments');
             });
 
@@ -3300,8 +3084,8 @@
             });
 
             if (pollingInterval) clearInterval(pollingInterval);
-            pollingInterval = setInterval(forceRefresh, 3000);
-            console.log('✅ Admin: Realtime listeners + polling (3s) registered');
+            pollingInterval = setInterval(forceRefresh, 8000);
+            console.log('✅ Admin: Realtime listeners + polling registered');
         }
 
         // ===== STATS =====
@@ -3844,12 +3628,6 @@
                 note.textContent = '';
                 return;
             }
-            // حالة 24 ساعة
-            if (start === '00:00' && end === '00:00') {
-                note.textContent = '⚠️ دوام 24 ساعة (جميع الأوقات متاحة)';
-                note.style.color = 'var(--gold)';
-                return;
-            }
             const [sH, sM] = start.split(':').map(Number);
             const [eH, eM] = end.split(':').map(Number);
             const startMinutes = sH * 60 + sM;
@@ -3868,6 +3646,9 @@
                 const t = getTranslation('extendsNextDay') || 'يمتد لليوم التالي';
                 msg += ` (${t})`;
             }
+            if (diffHours === 0 && diffMins === 0) {
+                msg = '⚠️ دوام 24 ساعة (يبدأ وينتهي في نفس الوقت)';
+            }
             note.textContent = msg;
             note.style.color = isExtended ? 'var(--gold)' : 'var(--text-muted)';
         }
@@ -3875,14 +3656,14 @@
         window.setWorkHours = function(hours) {
             const startInput = document.getElementById('workStart');
             const endInput = document.getElementById('workEnd');
+            let start = startInput.value || '09:00';
             if (hours === 24) {
                 startInput.value = '00:00';
                 endInput.value = '00:00';
                 updateWorkHoursNote();
-                showToast('تم ضبط الدوام على 24 ساعة (جميع الأوقات متاحة)', 'success');
+                showToast('تم ضبط الدوام على 24 ساعة (00:00 - 00:00)', 'success');
                 return;
             }
-            let start = startInput.value || '09:00';
             const [h, m] = start.split(':').map(Number);
             let endHours = h + hours;
             let endMinutes = m;
@@ -3892,7 +3673,8 @@
             const end = String(endHours).padStart(2, '0') + ':' + String(endMinutes).padStart(2, '0');
             endInput.value = end;
             updateWorkHoursNote();
-            showToast(`تم تحديث نهاية الدوام إلى ${end}`, 'success');
+            const t = getTranslation('toastSaved') || 'تم التحديث';
+            showToast(`${t}: نهاية الدوام ${end}`, 'success');
         };
 
         window.saveSettings = async function() {
@@ -3902,12 +3684,18 @@
                 showToast('الرجاء إدخال أوقات العمل', 'error');
                 return;
             }
+            const [sH, sM] = start.split(':').map(Number);
+            const [eH, eM] = end.split(':').map(Number);
+            if (isNaN(sH) || isNaN(sM) || isNaN(eH) || isNaN(eM)) {
+                showToast('الرجاء إدخال وقت صحيح', 'error');
+                return;
+            }
             try {
                 await db.updateSettings({ workStart: start, workEnd: end });
-                showToast('✅ تم حفظ الإعدادات', 'success');
+                showToast(getTranslation('toastSettingsSaved'), 'success');
                 updateWorkHoursNote();
             } catch (e) {
-                showToast('خطأ: ' + e.message, 'error');
+                showToast(getTranslation('toastError') + ': ' + e.message, 'error');
             }
         };
 
@@ -3965,7 +3753,7 @@
         };
 
         // ================================================================
-        //  PWA INSTALL (بدون createDynamicManifest)
+        //  PWA INSTALL
         // ================================================================
 
         function isRunningStandalone() {
@@ -4154,7 +3942,8 @@
 
         // ===== INIT =====
         function init() {
-            // لا ننشئ مانيفست ديناميكي – نستخدم الملف المنفصل
+            createDynamicManifest();
+
             const savedLang = localStorage.getItem('admin_preferred_language');
             if (savedLang && translations[savedLang]) currentLanguage = savedLang;
 
@@ -4206,5 +3995,6 @@
 
         init();
     </script>
+
 </body>
 </html>
