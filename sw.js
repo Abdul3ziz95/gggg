@@ -5,7 +5,7 @@
 //  - يستمع لأحداث push (لإشعارات لاحقة)
 // ==============================================================
 
-const CACHE_NAME = 'saloni-v5';
+const CACHE_NAME = 'saloni-v3';
 const ASSETS = [
   '/',
   '/index.html',
