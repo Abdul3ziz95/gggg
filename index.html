@@ -2130,13 +2130,15 @@
     </div>
 
     <!-- ============================================================ -->
-    <!--  CLIENT.JS - VERSION 3.3 (SUPABASE + REAL-TIME + SOUNDS + EXTENDED HOURS) -->
+    <!--  CLIENT.JS - VERSION 4.0 (REAL-TIME + EXTENDED HOURS + ACCURATE TRANSLATION) -->
     <!-- ============================================================ -->
     <script>
         // ==============================================================
-        //  CLIENT.JS - VERSION 3.3
-        //  تحسينات: دعم الفترات الممتدة لساعات العمل (مثل 07:00 → 02:00)
-        //  تحديث عرض وقت العمل لإظهار ملاحظة عند الامتداد لليوم التالي
+        //  CLIENT.JS - VERSION 4.0
+        //  - تحديث فوري عبر Supabase Realtime + BroadcastChannel
+        //  - ترجمة دقيقة للخدمات (name_ar, name_en, name_ur)
+        //  - دعم الدوام الممتد لليوم التالي (أي وقت من 1 إلى 24 ساعة)
+        //  - حساب دقيق لعدد الحجوزات القبلك في صفحة "مكاني"
         // ==============================================================
 
         // ===== STATE =====
@@ -2485,20 +2487,19 @@
         function updateTimeInfo() {
             const now = new Date();
             const currentTime = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
-            document.getElementById('workHoursDisplay').textContent = (workSchedule.startTime || '09:00') + ' - ' + (workSchedule.endTime || '17:00');
-            // عرض ملاحظة إذا كانت النهاية أقل من البداية (تمتد لليوم التالي)
-            const [sH, sM] = (workSchedule.startTime || '09:00').split(':').map(Number);
-            const [eH, eM] = (workSchedule.endTime || '17:00').split(':').map(Number);
+            const start = workSchedule.startTime || '09:00';
+            const end = workSchedule.endTime || '17:00';
+            let displayEnd = end;
+            const [sH, sM] = start.split(':').map(Number);
+            const [eH, eM] = end.split(':').map(Number);
             let endMinutes = eH * 60 + eM;
             let startMinutes = sH * 60 + sM;
-            let displayEnd = workSchedule.endTime || '17:00';
             if (endMinutes < startMinutes) {
-                // إضافة ملاحظة
                 const t = translations[currentLanguage];
                 const extendsNote = t.extendsNextDay || '(يمتد لليوم التالي)';
-                document.getElementById('workHoursDisplay').textContent = (workSchedule.startTime || '09:00') + ' - ' + displayEnd + ' ' + extendsNote;
+                displayEnd = end + ' ' + extendsNote;
             }
-
+            document.getElementById('workHoursDisplay').textContent = start + ' - ' + displayEnd;
             document.getElementById('currentTimeDisplay').textContent = currentTime;
             const isWithin = isWithinWorkHours();
             const statusDisplay = document.getElementById('statusTimeDisplay');
@@ -2523,7 +2524,6 @@
             const [eH, eM] = (workSchedule.endTime || '17:00').split(':').map(Number);
             const startMinutes = sH * 60 + sM;
             let endMinutes = eH * 60 + eM;
-            // إذا كانت النهاية أقل من البداية، فهي تمتد لليوم التالي
             if (endMinutes < startMinutes) {
                 endMinutes += 24 * 60;
             }
@@ -2886,7 +2886,7 @@
         }
 
         // ==============================================================
-        //  SUPABASE CONNECTION
+        //  SUPABASE CONNECTION + REALTIME
         // ==============================================================
 
         let reconnectAttempts = 0;
@@ -2899,6 +2899,7 @@
                     reconnectAttempts = 0;
                     console.log('✅ Supabase connected');
                     loadAllData();
+                    // تسجيل المستمعين للتحديث الفوري
                     db.on('appointments', async (payload, appointments) => {
                         if (_updateLock) return;
                         _updateLock = true;
@@ -2956,7 +2957,7 @@
         }
 
         // ==============================================================
-        //  REFRESH MY APPOINTMENTS
+        //  REFRESH MY APPOINTMENTS (مع الأصوات عند تغير الحالة)
         // ==============================================================
 
         async function refreshMyAppointments(force = false) {
@@ -3136,7 +3137,7 @@
         };
 
         // ==============================================================
-        //  QUEUE DISPLAY
+        //  QUEUE DISPLAY (مع حساب دقيق للعدد القبلك)
         // ==============================================================
 
         function updateQueueDisplay() {
@@ -3192,9 +3193,11 @@
                 const currentNum = inProgress ? inProgress.queue_number : null;
                 const myNum = activeQueueAppointment.queue_number;
 
+                // عدد الأشخاص قبلي (نفس الحلاق أو أي حلاق إذا لم يكن محدداً)
+                const myStaffId = activeQueueAppointment.staff_id;
                 const ahead = todayAppointments.filter(a =>
                     a.queue_number < myNum &&
-                    a.staff_id === activeQueueAppointment.staff_id &&
+                    (a.staff_id === myStaffId || !myStaffId) &&
                     (a.status === 'pending' || a.status === 'in_progress')
                 ).length;
 
@@ -3210,7 +3213,7 @@
                         a.queue_number < myNum && 
                         a.queue_number > 0 && 
                         a.queue_number >= (currentNum || 0) &&
-                        a.staff_id === activeQueueAppointment.staff_id
+                        (a.staff_id === myStaffId || !myStaffId)
                     )
                     .sort((a, b) => a.queue_number - b.queue_number)
                     .map(a => `#${a.queue_number}`);
