@@ -1,142 +1,114 @@
-// ================================================================
-//  sw.js - Service Worker لتشغيل التطبيق كـ PWA
-//  الإصدار 1.0.0
-// ================================================================
+// ==============================================================
+//  sw.js - Service Worker للتطبيق
+//  - يدعم التحديث الفوري عبر Cache API
+//  - يخزن الملفات الأساسية للعمل دون اتصال
+//  - يستمع لأحداث push (لإشعارات لاحقة)
+// ==============================================================
 
-const CACHE_NAME = 'saloni-admin-v1.0.0';
+const CACHE_NAME = 'saloni-v5';
 const ASSETS = [
   '/',
-  '/admin.html',
   '/index.html',
+  '/admin.html',
   '/display.html',
-  '/offline.html',
   '/supabase-client.js',
   '/manifest.json',
-  'https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap',
-  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css',
-  'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2'
+  '/icon-72.png',
+  '/icon-96.png',
+  '/icon-128.png',
+  '/icon-144.png',
+  '/icon-152.png',
+  '/icon-192.png',
+  '/icon-384.png',
+  '/icon-512.png'
 ];
 
-// ===== INSTALL =====
-self.addEventListener('install', (event) => {
+// ===== تثبيت SW =====
+self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then((cache) => {
-        console.log('✅ SW: Caching assets');
+      .then(cache => {
+        console.log('✅ Service Worker: Caching assets');
         return cache.addAll(ASSETS);
       })
       .then(() => self.skipWaiting())
   );
 });
 
-// ===== ACTIVATE =====
-self.addEventListener('activate', (event) => {
+// ===== تنشيط SW =====
+self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
+    caches.keys().then(keys => {
       return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            console.log('✅ SW: Removing old cache', cacheName);
-            return caches.delete(cacheName);
-          }
-        })
+        keys.filter(key => key !== CACHE_NAME)
+          .map(key => caches.delete(key))
       );
     }).then(() => self.clients.claim())
   );
 });
 
-// ===== FETCH =====
-self.addEventListener('fetch', (event) => {
-  // تجاهل طلبات Supabase API
+// ===== استراتيجية Cache First مع تحديث الخلفية =====
+self.addEventListener('fetch', event => {
+  // تجاهل طلبات Supabase (API) لمنع التخزين المؤقت للبيانات الحساسة
   if (event.request.url.includes('supabase.co')) {
     event.respondWith(fetch(event.request));
     return;
   }
 
-  // تجاهل طلبات Google Fonts و CDN
-  if (event.request.url.includes('fonts.googleapis.com') ||
-      event.request.url.includes('fonts.gstatic.com') ||
-      event.request.url.includes('cdnjs.cloudflare.com')) {
-    event.respondWith(fetch(event.request));
-    return;
-  }
-
-  // استراتيجية: Cache First ثم Network
   event.respondWith(
     caches.match(event.request)
-      .then((cachedResponse) => {
-        if (cachedResponse) {
+      .then(cached => {
+        if (cached) {
           // تحديث الخلفية
-          fetch(event.request)
-            .then((networkResponse) => {
-              if (networkResponse && networkResponse.status === 200) {
-                caches.open(CACHE_NAME)
-                  .then((cache) => {
-                    cache.put(event.request, networkResponse.clone());
-                  });
-              }
-            })
-            .catch(() => {});
-          return cachedResponse;
-        }
-
-        return fetch(event.request)
-          .then((response) => {
-            if (!response || response.status !== 200 || response.type !== 'basic') {
-              return response;
-            }
-            const responseToCache = response.clone();
-            caches.open(CACHE_NAME)
-              .then((cache) => {
-                cache.put(event.request, responseToCache);
+          fetch(event.request).then(response => {
+            if (response && response.status === 200) {
+              caches.open(CACHE_NAME).then(cache => {
+                cache.put(event.request, response.clone());
               });
-            return response;
-          })
-          .catch(() => {
-            if (event.request.headers.get('accept')?.includes('text/html')) {
-              return caches.match('/offline.html');
             }
-          });
+          }).catch(() => {});
+          return cached;
+        }
+        return fetch(event.request).then(response => {
+          // تخزين الملف الجديد في الكاش
+          if (response && response.status === 200) {
+            caches.open(CACHE_NAME).then(cache => {
+              cache.put(event.request, response.clone());
+            });
+          }
+          return response;
+        }).catch(() => {
+          // عرض صفحة الخطأ في حال عدم الاتصال
+          return new Response('⚠️ لا يوجد اتصال بالإنترنت', { status: 503 });
+        });
       })
   );
 });
 
-// ===== PUSH NOTIFICATIONS =====
-self.addEventListener('push', (event) => {
-  let data = {};
-  try {
-    data = event.data.json();
-  } catch (e) {
-    data = { body: '📢 تحديث جديد في صالوني' };
-  }
-
+// ===== استقبال إشعارات push =====
+self.addEventListener('push', event => {
+  const data = event.data ? event.data.json() : {};
+  const title = data.title || 'صالوني';
   const options = {
-    body: data.body || '📢 تحديث جديد في صالوني',
+    body: data.body || 'هناك تحديث جديد في حجزك',
     icon: '/icon-192.png',
-    badge: '/icon-152.png',
+    badge: '/icon-96.png',
     vibrate: [200, 100, 200],
-    data: {
-      url: data.url || '/admin.html'
-    },
-    actions: [
-      { action: 'open', title: 'فتح لوحة المدير' }
-    ]
+    data: data.url || '/'
   };
-
   event.waitUntil(
-    self.registration.showNotification('✂️ صالوني', options)
+    self.registration.showNotification(title, options)
   );
 });
 
-// ===== NOTIFICATION CLICK =====
-self.addEventListener('notificationclick', (event) => {
+// ===== التعامل مع ضغط الإشعار =====
+self.addEventListener('notificationclick', event => {
   event.notification.close();
-
-  if (event.action === 'open') {
-    const url = event.notification.data.url || '/admin.html';
-    event.waitUntil(
-      clients.matchAll({ type: 'window' }).then((windowClients) => {
-        for (const client of windowClients) {
+  const url = event.notification.data || '/';
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true })
+      .then(windowClients => {
+        for (let client of windowClients) {
           if (client.url === url && 'focus' in client) {
             return client.focus();
           }
@@ -145,8 +117,5 @@ self.addEventListener('notificationclick', (event) => {
           return clients.openWindow(url);
         }
       })
-    );
-  }
+  );
 });
-
-console.log('✅ Service Worker loaded');
