@@ -690,7 +690,7 @@
 
 <script>
     // ==============================================================
-    // DISPLAY.JS - VERSION 4.1 (BARBER-FOCUSED + REAL-TIME + SETTINGS)
+    // DISPLAY.JS - VERSION 4.2 (BARBER-FOCUSED + REAL-TIME + SETTINGS)
     // ==============================================================
 
     const barbersGrid = document.getElementById('barbersGrid');
@@ -729,7 +729,6 @@
         const start = workSchedule.startTime || '09:00';
         const end = workSchedule.endTime || '17:00';
         display.textContent = `${start} - ${end}`;
-        // إضافة ملاحظة إذا كانت النهاية أقل من البداية (تمتد لليوم التالي)
         const [sH, sM] = start.split(':').map(Number);
         const [eH, eM] = end.split(':').map(Number);
         const startMinutes = sH * 60 + sM;
@@ -752,7 +751,6 @@
             return;
         }
 
-        // إحصائيات اليوم
         const todayAppointments = allAppointments.filter(a => a.date === today);
         const totalToday = todayAppointments.length;
         const inProgress = todayAppointments.filter(a => a.status === 'in_progress').length;
@@ -762,7 +760,6 @@
         inProgressCountEl.textContent = inProgress;
         waitingCountEl.textContent = waiting;
 
-        // بناء بطاقات الحلاقين
         let html = '';
         activeBarbers.forEach(barber => {
             const barberAppointments = todayAppointments.filter(a =>
@@ -818,7 +815,7 @@
             if (connected) {
                 isGistConfigured = true;
                 console.log('✅ Display: Supabase connected');
-                // تسجيل المستمعين
+                // تسجيل المستمعين للتحديث الفوري
                 setupRealtime();
                 // تحميل البيانات
                 const cache = db.getCache();
@@ -856,7 +853,7 @@
         }
     }
 
-    // ===== SETUP REALTIME =====
+    // ===== SETUP REALTIME (محسن مع مستمع عام) =====
     function setupRealtime() {
         // الاستماع لتغييرات الحجوزات
         db.on('appointments', () => {
@@ -881,6 +878,27 @@
             };
             updateWorkHoursDisplay();
             console.log('🔄 Display: settings updated');
+        });
+
+        // مستمع عام كضمان إضافي لتحديث كل شيء عند أي تغيير
+        db.on('*', (table, payload, cache) => {
+            console.log(`🔄 Display: universal update on ${table}`);
+            if (table === 'appointments' || table === '*' || !table) {
+                allAppointments = cache.appointments || [];
+                renderBarbers();
+            }
+            if (table === 'staff' || table === '*' || !table) {
+                allBarbers = cache.staff || [];
+                renderBarbers();
+            }
+            if (table === 'settings' || table === '*' || !table) {
+                const settings = cache.settings || {};
+                workSchedule = {
+                    startTime: settings.workStart || '09:00',
+                    endTime: settings.workEnd || '17:00'
+                };
+                updateWorkHoursDisplay();
+            }
         });
 
         console.log('✅ Display: Realtime listeners registered');
